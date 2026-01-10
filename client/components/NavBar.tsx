@@ -21,12 +21,12 @@ export function NavBar({
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-accent rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                <span className="font-bold text-primary-foreground text-xs">
-                  a
-                </span>
-              </div>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Roblox_Logo.svg/2048px-Roblox_Logo.svg.png"
+                alt="Roblox"
+                className="h-7 object-contain"
+              />
               <span className="font-bold text-sm hidden sm:inline tracking-tight text-foreground">
                 AssetHub
               </span>
