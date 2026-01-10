@@ -122,14 +122,11 @@ export async function getUserTickets(userId: string): Promise<Ticket[]> {
 
 export async function getAllTickets(): Promise<Ticket[]> {
   try {
-    const q = query(
-      collection(db, TICKETS_COLLECTION),
-      orderBy("updatedAt", "desc"),
-    );
+    const q = query(collection(db, TICKETS_COLLECTION));
 
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
+    const tickets = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate?.() || new Date(),
@@ -139,6 +136,9 @@ export async function getAllTickets(): Promise<Ticket[]> {
         timestamp: msg.timestamp?.toDate?.() || new Date(),
       })),
     })) as Ticket[];
+
+    // Sort by updatedAt descending on the client side
+    return tickets.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   } catch (error) {
     console.error("Error fetching tickets:", error);
     return [];
