@@ -13,7 +13,7 @@ export function StepEmail({
 }: StepEmailProps) {
   return (
     <div className="space-y-5">
-      <div>
+      <div className="text-center">
         <h2 className="text-xl font-semibold text-foreground mb-1">
           Enter your email
         </h2>
