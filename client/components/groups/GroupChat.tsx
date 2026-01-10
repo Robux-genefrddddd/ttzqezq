@@ -197,43 +197,52 @@ export default function GroupChat({ groupId }: GroupChatProps) {
           </div>
         )}
 
-        <form onSubmit={handleSendMessage} className="flex gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageSelect}
-            className="hidden"
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={sendingMessage || uploading}
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ImageIcon size={20} />
-          </button>
+        <form onSubmit={handleSendMessage} className="space-y-2">
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Type a message... (text only or add image)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              disabled={sendingMessage || uploading}
+              className="flex-1"
+            />
 
-          <Input
-            type="text"
-            placeholder="Type a message..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            disabled={sendingMessage || uploading}
-            className="flex-1"
-          />
+            <Button
+              type="submit"
+              disabled={!content.trim() || sendingMessage || uploading}
+              size="sm"
+              title="Send message"
+            >
+              {sendingMessage || uploading ? (
+                <Loader size={16} className="animate-spin" />
+              ) : (
+                <Send size={16} />
+              )}
+            </Button>
+          </div>
 
-          <Button
-            type="submit"
-            disabled={!content.trim() || sendingMessage || uploading}
-            size="sm"
-          >
-            {sendingMessage || uploading ? (
-              <Loader size={16} className="animate-spin" />
-            ) : (
-              <Send size={16} />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sendingMessage || uploading}
+              className="text-xs px-3 py-1.5 border border-border rounded hover:bg-secondary transition-colors flex items-center gap-1"
+            >
+              <ImageIcon size={14} />
+              Attach Image (Optional)
+            </button>
+            <p className="text-xs text-muted-foreground">
+              Images are optional - you can send text alone
+            </p>
+          </div>
         </form>
       </div>
     </div>
