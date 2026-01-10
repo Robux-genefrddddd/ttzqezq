@@ -67,6 +67,10 @@ export default function AssetDetail() {
         if (user) {
           const existing = await getUserReviewForAsset(id, user.uid);
           setUserReview(existing);
+
+          // Check if favorited
+          const fav = await isFavorited(user.uid, id);
+          setIsFav(fav);
         }
       } catch (err) {
         console.error("Error loading asset:", err);
