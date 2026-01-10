@@ -11,23 +11,23 @@ export function AssetCard({ asset }: AssetCardProps) {
 
   return (
     <Link to={`/asset/${asset.id}`}>
-      <div className="group h-full card-hover">
-        <div className="overflow-hidden bg-card border border-border/50 rounded-sm flex flex-col h-full">
+      <div className="group h-full">
+        <div className="overflow-hidden bg-card border border-border/30 rounded-2xl flex flex-col h-full card-hover">
           {/* Image Section */}
-          <div className="relative h-40 overflow-hidden bg-muted/40">
+          <div className="relative h-44 overflow-hidden bg-muted/30">
             <img
               src={asset.imageUrl}
               alt={asset.name}
-              className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
             />
 
             {/* Price Badge */}
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-3 right-3">
               <span
-                className={`px-2 py-1 rounded-sm text-xs font-medium backdrop-blur-sm ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold backdrop-blur-sm ${
                   isFree
-                    ? "bg-foreground/10 text-foreground/90"
-                    : "bg-accent/20 text-accent"
+                    ? "bg-foreground/15 text-foreground/90"
+                    : "bg-accent/25 text-accent"
                 }`}
               >
                 {isFree ? "Free" : `$${asset.price}`}
@@ -35,8 +35,8 @@ export function AssetCard({ asset }: AssetCardProps) {
             </div>
 
             {/* Type Badge */}
-            <div className="absolute top-2 left-2">
-              <span className="px-2 py-0.5 rounded-sm text-xs font-medium bg-background/70 text-foreground/90 capitalize">
+            <div className="absolute top-3 left-3">
+              <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-background/60 backdrop-blur-sm text-foreground/90 capitalize">
                 {asset.type}
               </span>
             </div>
