@@ -133,10 +133,7 @@ export default function SupportNewTicket() {
               <SelectContent>
                 {CATEGORIES.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id} className="text-sm">
-                    <span className="flex items-center gap-2">
-                      <span className="text-base">{cat.icon}</span>
-                      {cat.name}
-                    </span>
+                    {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
