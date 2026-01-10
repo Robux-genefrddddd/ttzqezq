@@ -204,6 +204,22 @@ const App = () => (
                 </Layout>
               }
             />
+            <Route
+              path="/groups"
+              element={
+                <Layout>
+                  <Groups />
+                </Layout>
+              }
+            />
+            <Route
+              path="/groups/:id"
+              element={
+                <Layout>
+                  <GroupDetail />
+                </Layout>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route
               path="*"
