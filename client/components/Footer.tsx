@@ -119,11 +119,11 @@ export function Footer() {
             <h4 className="font-semibold mb-4 text-foreground text-xs uppercase tracking-widest">
               Legal
             </h4>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2.5">
               <li>
                 <Link
                   to="/privacy"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs text-muted-foreground/80 hover:text-foreground transition-colors"
                 >
                   Privacy
                 </Link>
@@ -131,7 +131,7 @@ export function Footer() {
               <li>
                 <Link
                   to="/terms"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs text-muted-foreground/80 hover:text-foreground transition-colors"
                 >
                   Terms
                 </Link>
@@ -139,7 +139,7 @@ export function Footer() {
               <li>
                 <Link
                   to="/cookies"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs text-muted-foreground/80 hover:text-foreground transition-colors"
                 >
                   Cookies
                 </Link>
@@ -149,7 +149,7 @@ export function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-border/20 my-8" />
+        <div className="section-divider my-8" />
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
