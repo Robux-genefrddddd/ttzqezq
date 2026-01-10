@@ -221,6 +221,14 @@ const App = () => (
                 </Layout>
               }
             />
+            <Route
+              path="/messages"
+              element={
+                <Layout>
+                  <Messages />
+                </Layout>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route
               path="*"
