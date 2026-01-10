@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AssetCard } from "@/components/AssetCard";
 import { Search, X } from "lucide-react";
-import { Asset, getPublishedAssets } from "@/lib/assetService";
+import { getPublishedAssets, type Asset } from "@/lib/assetService";
 
 const CATEGORIES = [
   "3D Models",
