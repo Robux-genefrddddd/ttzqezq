@@ -60,7 +60,7 @@ function RoleBadge({ role }: { role?: string }) {
 
 export function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isAuthenticated, userProfile, loading } = useAuth();
+  const { isAuthenticated, userProfile, loading, unreadCount } = useAuth();
 
   const handleLogout = async () => {
     try {
