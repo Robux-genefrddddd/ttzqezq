@@ -38,6 +38,8 @@ import {
 } from "@/lib/assetService";
 import { logoutUser } from "@/lib/auth";
 import { WarningsSection } from "@/components/WarningsSection";
+import { EditAssetDialog } from "@/components/EditAssetDialog";
+import { UpdateFileDialog } from "@/components/UpdateFileDialog";
 import { toast } from "sonner";
 
 export default function Dashboard() {
