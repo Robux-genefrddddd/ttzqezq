@@ -163,9 +163,9 @@ export default function About() {
       </section>
 
       {/* Team Section */}
-      <section className="py-12 md:py-16 border-b border-border/50">
+      <section className="py-8 md:py-10 border-b border-border/50">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-8">Our Team</h2>
+          <h2 className="text-xl font-bold mb-6">Our Team</h2>
 
           {loading ? (
             <div className="text-center text-muted-foreground">
