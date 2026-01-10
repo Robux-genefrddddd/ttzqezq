@@ -1,19 +1,28 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { logoutUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface NavBarProps {
-  isAuthenticated?: boolean;
-  user?: { displayName: string; email: string } | null;
-  onLogout?: () => void;
-}
-
-export function NavBar({
-  isAuthenticated = false,
-  user,
-  onLogout,
-}: NavBarProps) {
+export function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, userProfile, loading } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/20">
@@ -25,7 +34,7 @@ export function NavBar({
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Roblox_Logo.svg/2048px-Roblox_Logo.svg.png"
                 alt="Roblox"
-                className="h-5 object-contain"
+                className="h-6 object-contain"
               />
               <span className="font-bold text-sm hidden sm:inline tracking-tight text-foreground">
                 RbxAssets
@@ -51,40 +60,69 @@ export function NavBar({
 
           {/* Auth Section */}
           <div className="flex items-center gap-3">
-            {isAuthenticated && user ? (
+            {isAuthenticated && userProfile && !loading ? (
               <div className="hidden sm:flex items-center gap-3">
-                <button className="p-2 text-foreground/70 hover:text-foreground transition-colors hover:bg-secondary/50 rounded-lg">
-                  <User size={18} />
-                </button>
-                <Link
-                  to="/dashboard"
-                  className="px-4 py-2 text-foreground/80 hover:text-foreground transition-colors font-medium text-sm rounded-xl hover:bg-secondary/50"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={onLogout}
-                  className="flex items-center gap-1.5 px-4 py-2 text-foreground/80 hover:text-foreground bg-secondary/40 hover:bg-secondary border border-border/40 rounded-xl transition-colors text-sm font-medium"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
+                {/* User Profile Badge */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-2 bg-secondary/40 border border-border/40 rounded-xl hover:bg-secondary/60 transition-all cursor-pointer group">
+                      <img
+                        src={
+                          userProfile.profileImage ||
+                          "https://api.dicebear.com/7.x/avataaars/svg?seed=" +
+                            userProfile.username
+                        }
+                        alt={userProfile.username}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                      <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {userProfile.username}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="px-4 py-2 border-b border-border/20">
+                      <p className="text-sm font-semibold text-foreground">
+                        {userProfile.displayName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {userProfile.email}
+                      </p>
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="cursor-pointer">
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/upload" className="cursor-pointer">
+                        Upload Asset
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="cursor-pointer text-red-400 focus:bg-red-500/20"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-foreground/70 hover:text-foreground font-medium text-sm rounded-xl hover:bg-secondary/40 transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-5 py-2 bg-primary text-primary-foreground font-semibold text-sm rounded-xl hover:opacity-90 transition-all shadow-md"
-                >
-                  Sign Up
-                </Link>
-              </div>
+              !loading && (
+                <div className="hidden sm:flex items-center gap-2">
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm">Sign Up</Button>
+                  </Link>
+                </div>
+              )
             )}
 
             {/* Mobile Menu Button */}
@@ -112,36 +150,66 @@ export function NavBar({
             >
               About
             </Link>
-            {isAuthenticated && user ? (
+
+            {isAuthenticated && userProfile && !loading ? (
               <>
+                <div className="px-4 py-3 border-t border-border/20 mt-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <img
+                      src={
+                        userProfile.profileImage ||
+                        "https://api.dicebear.com/7.x/avataaars/svg?seed=" +
+                          userProfile.username
+                      }
+                      alt={userProfile.username}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        {userProfile.username}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {userProfile.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <Link
                   to="/dashboard"
                   className="block px-4 py-2 hover:bg-secondary/40 transition-colors font-medium text-sm"
                 >
                   Dashboard
                 </Link>
+                <Link
+                  to="/upload"
+                  className="block px-4 py-2 hover:bg-secondary/40 transition-colors font-medium text-sm"
+                >
+                  Upload Asset
+                </Link>
                 <button
-                  onClick={onLogout}
-                  className="w-full text-left px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-secondary/40 transition-colors font-medium text-sm"
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/20 transition-colors font-medium text-sm mt-2 border-t border-border/20"
                 >
                   Sign Out
                 </button>
               </>
             ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="block px-4 py-2 hover:bg-secondary/40 transition-colors font-medium text-sm"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="block px-4 py-2 bg-primary text-primary-foreground font-medium text-sm rounded-xl hover:opacity-90 transition-all"
-                >
-                  Sign Up
-                </Link>
-              </>
+              !loading && (
+                <>
+                  <Link
+                    to="/login"
+                    className="block px-4 py-2 hover:bg-secondary/40 transition-colors font-medium text-sm"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block px-4 py-2 bg-primary text-primary-foreground font-medium text-sm rounded-xl hover:opacity-90 transition-all"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )
             )}
           </div>
         )}
