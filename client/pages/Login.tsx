@@ -19,7 +19,9 @@ export default function Login() {
       await loginUser(email, password);
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to sign in. Please check your credentials.");
+      setError(
+        err.message || "Failed to sign in. Please check your credentials.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -48,11 +50,17 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground"
+              >
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-muted-foreground" size={16} />
+                <Mail
+                  className="absolute left-3 top-3 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   id="email"
                   type="email"
@@ -67,11 +75,17 @@ export default function Login() {
 
             {/* Password */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-foreground"
+              >
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-muted-foreground" size={16} />
+                <Lock
+                  className="absolute left-3 top-3 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   id="password"
                   type="password"
@@ -93,7 +107,10 @@ export default function Login() {
                 />
                 <span className="text-muted-foreground">Remember me</span>
               </label>
-              <a href="#" className="text-accent/80 hover:text-accent transition-colors">
+              <a
+                href="#"
+                className="text-accent/80 hover:text-accent transition-colors"
+              >
                 Forgot password?
               </a>
             </div>
@@ -115,7 +132,9 @@ export default function Login() {
               <div className="w-full border-t border-border/20" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-secondary/15 text-muted-foreground">Or continue with</span>
+              <span className="px-2 bg-secondary/15 text-muted-foreground">
+                Or continue with
+              </span>
             </div>
           </div>
 
@@ -128,7 +147,10 @@ export default function Login() {
         {/* Sign Up Link */}
         <p className="text-center text-sm text-muted-foreground mt-6">
           Don't have an account?{" "}
-          <Link to="/register" className="text-accent hover:text-accent/80 font-medium transition-colors">
+          <Link
+            to="/register"
+            className="text-accent hover:text-accent/80 font-medium transition-colors"
+          >
             Create one
           </Link>
         </p>

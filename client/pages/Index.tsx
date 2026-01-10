@@ -111,7 +111,9 @@ export default function Index() {
               </h1>
 
               <p className="text-base text-muted-foreground max-w-2xl">
-                Professional marketplace for 3D models, scripts, UI components, animations, and resources. Find what studios and developers use daily.
+                Professional marketplace for 3D models, scripts, UI components,
+                animations, and resources. Find what studios and developers use
+                daily.
               </p>
             </div>
 
@@ -137,7 +139,9 @@ export default function Index() {
             <div className="grid grid-cols-3 gap-4 pt-4">
               <div className="p-3 bg-secondary/20 rounded-lg border border-border/20">
                 <p className="text-2xl font-bold">10K+</p>
-                <p className="text-xs text-muted-foreground mt-1">Quality Assets</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Quality Assets
+                </p>
               </div>
               <div className="p-3 bg-secondary/20 rounded-lg border border-border/20">
                 <p className="text-2xl font-bold">50K+</p>
@@ -145,7 +149,9 @@ export default function Index() {
               </div>
               <div className="p-3 bg-secondary/20 rounded-lg border border-border/20">
                 <p className="text-2xl font-bold">$2M+</p>
-                <p className="text-xs text-muted-foreground mt-1">Distributed</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Distributed
+                </p>
               </div>
             </div>
           </div>

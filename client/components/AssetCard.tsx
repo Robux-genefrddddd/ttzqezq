@@ -61,7 +61,9 @@ export function AssetCard({ asset }: AssetCardProps) {
                 <span className="font-medium text-foreground/85 text-xs">
                   {asset.rating.toFixed(1)}
                 </span>
-                <span className="text-muted-foreground/70 text-xs">({asset.reviews})</span>
+                <span className="text-muted-foreground/70 text-xs">
+                  ({asset.reviews})
+                </span>
               </div>
               <div className="flex items-center gap-0.5 text-muted-foreground/70">
                 <Download size={12} />

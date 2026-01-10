@@ -60,7 +60,10 @@ export default function Register() {
         <div className="bg-secondary/15 border border-border/15 rounded-lg p-6 space-y-5">
           {error && (
             <div className="flex items-center gap-2.5 p-3 bg-destructive/15 border border-destructive/30 rounded-lg">
-              <AlertCircle size={16} className="text-destructive flex-shrink-0" />
+              <AlertCircle
+                size={16}
+                className="text-destructive flex-shrink-0"
+              />
               <p className="text-xs text-destructive">{error}</p>
             </div>
           )}
@@ -68,11 +71,17 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-2">
-              <label htmlFor="username" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-foreground"
+              >
                 Username
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-3 text-muted-foreground" size={16} />
+                <User
+                  className="absolute left-3 top-3 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   id="username"
                   type="text"
@@ -87,7 +96,10 @@ export default function Register() {
 
             {/* Display Name */}
             <div className="space-y-2">
-              <label htmlFor="displayName" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="displayName"
+                className="block text-sm font-medium text-foreground"
+              >
                 Display Name (Optional)
               </label>
               <input
@@ -102,11 +114,17 @@ export default function Register() {
 
             {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground"
+              >
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-muted-foreground" size={16} />
+                <Mail
+                  className="absolute left-3 top-3 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   id="email"
                   type="email"
@@ -121,11 +139,17 @@ export default function Register() {
 
             {/* Password */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-foreground"
+              >
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-muted-foreground" size={16} />
+                <Lock
+                  className="absolute left-3 top-3 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   id="password"
                   type="password"
@@ -140,11 +164,17 @@ export default function Register() {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-foreground"
+              >
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-muted-foreground" size={16} />
+                <Lock
+                  className="absolute left-3 top-3 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   id="confirmPassword"
                   type="password"
@@ -166,11 +196,17 @@ export default function Register() {
               />
               <span className="text-xs text-muted-foreground leading-relaxed">
                 I agree to the{" "}
-                <a href="#" className="text-accent hover:text-accent/80 transition-colors">
+                <a
+                  href="#"
+                  className="text-accent hover:text-accent/80 transition-colors"
+                >
                   Terms of Service
                 </a>{" "}
                 and{" "}
-                <a href="#" className="text-accent hover:text-accent/80 transition-colors">
+                <a
+                  href="#"
+                  className="text-accent hover:text-accent/80 transition-colors"
+                >
                   Privacy Policy
                 </a>
               </span>
@@ -179,7 +215,13 @@ export default function Register() {
             {/* Sign Up Button */}
             <button
               type="submit"
-              disabled={isLoading || !username || !email || !password || !confirmPassword}
+              disabled={
+                isLoading ||
+                !username ||
+                !email ||
+                !password ||
+                !confirmPassword
+              }
               className="w-full py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-sm"
             >
               {isLoading ? "Creating account..." : "Create Account"}
@@ -193,7 +235,9 @@ export default function Register() {
               <div className="w-full border-t border-border/20" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-secondary/15 text-muted-foreground">Or sign up with</span>
+              <span className="px-2 bg-secondary/15 text-muted-foreground">
+                Or sign up with
+              </span>
             </div>
           </div>
 
@@ -206,7 +250,10 @@ export default function Register() {
         {/* Sign In Link */}
         <p className="text-center text-sm text-muted-foreground mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-accent hover:text-accent/80 font-medium transition-colors">
+          <Link
+            to="/login"
+            className="text-accent hover:text-accent/80 font-medium transition-colors"
+          >
             Sign in
           </Link>
         </p>

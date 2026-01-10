@@ -26,11 +26,15 @@ export async function registerUser(
   email: string,
   password: string,
   username: string,
-  displayName: string
+  displayName: string,
 ): Promise<UserProfile> {
   try {
     // Create auth user
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     const user = userCredential.user;
 
     // Update auth profile
@@ -62,10 +66,14 @@ export async function registerUser(
 
 export async function loginUser(
   email: string,
-  password: string
+  password: string,
 ): Promise<User> {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     return userCredential.user;
   } catch (error) {
     console.error("Login error:", error);
@@ -87,7 +95,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     const docSnap = await getDoc(doc(db, "users", uid));
     if (docSnap.exists()) {
       return {
-        ...docSnap.data() as UserProfile,
+        ...(docSnap.data() as UserProfile),
         createdAt: docSnap.data().createdAt.toDate?.() || new Date(),
       };
     }
@@ -100,7 +108,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 
 export async function updateUserProfile(
   uid: string,
-  updates: Partial<UserProfile>
+  updates: Partial<UserProfile>,
 ): Promise<void> {
   try {
     await updateDoc(doc(db, "users", uid), updates);
