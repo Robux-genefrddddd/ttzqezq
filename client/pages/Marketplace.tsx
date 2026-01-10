@@ -246,41 +246,41 @@ export default function Marketplace() {
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar Filters - Desktop */}
-          <div className="hidden lg:block space-y-6">
+          <div className="hidden lg:block space-y-4">
             <div>
-              <h3 className="font-semibold mb-3 flex items-center justify-between">
+              <h3 className="font-semibold text-sm mb-4 flex items-center justify-between">
                 Filters
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Clear
+                    Clear all
                   </button>
                 )}
               </h3>
 
               {/* Search */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                   <input
                     type="text"
-                    placeholder="Search assets..."
+                    placeholder="Search..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="w-full pl-9 pr-3 py-2 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-sm"
                   />
                 </div>
               </div>
 
               {/* Type Filter */}
-              <div className="mb-6">
-                <label className="text-sm font-medium block mb-3">Asset Type</label>
+              <div className="mb-4">
+                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">Type</label>
                 <select
                   value={filters.type || ""}
                   onChange={(e) => handleFilterChange("type", e.target.value || undefined)}
-                  className="w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
                 >
                   <option value="">All Types</option>
                   {assetTypes.map((type) => (
@@ -292,12 +292,12 @@ export default function Marketplace() {
               </div>
 
               {/* Category Filter */}
-              <div className="mb-6">
-                <label className="text-sm font-medium block mb-3">Category</label>
+              <div className="mb-4">
+                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">Category</label>
                 <select
                   value={filters.category || ""}
                   onChange={(e) => handleFilterChange("category", e.target.value || undefined)}
-                  className="w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
                 >
                   <option value="">All Categories</option>
                   {categories.map((cat) => (
@@ -309,12 +309,12 @@ export default function Marketplace() {
               </div>
 
               {/* Price Filter */}
-              <div className="mb-6">
-                <label className="text-sm font-medium block mb-3">Price</label>
+              <div className="mb-4">
+                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">Price</label>
                 <select
                   value={filters.priceRange}
                   onChange={(e) => handleFilterChange("priceRange", e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
                 >
                   <option value="all">All Prices</option>
                   <option value="free">Free Only</option>
@@ -324,14 +324,14 @@ export default function Marketplace() {
 
               {/* Sort Filter */}
               <div>
-                <label className="text-sm font-medium block mb-3">Sort By</label>
+                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">Sort</label>
                 <select
                   value={filters.sortBy}
                   onChange={(e) => handleFilterChange("sortBy", e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="popular">Most Popular</option>
+                  <option value="newest">Newest</option>
+                  <option value="popular">Popular</option>
                   <option value="rating">Highest Rated</option>
                 </select>
               </div>
