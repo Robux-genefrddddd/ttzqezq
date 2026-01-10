@@ -250,16 +250,22 @@ export async function sendGroupMessage(
 ): Promise<string> {
   try {
     const messagesRef = collection(db, GROUPS_COLLECTION, groupId, "messages");
-    const docRef = await addDoc(messagesRef, {
+    const messageData: any = {
       groupId,
       senderId,
       senderName,
-      senderAvatar,
+      senderAvatar: senderAvatar || null,
       content,
-      imageUrl,
       timestamp: Timestamp.now(),
       isEdited: false,
-    });
+    };
+
+    // Only add imageUrl if it's provided
+    if (imageUrl) {
+      messageData.imageUrl = imageUrl;
+    }
+
+    const docRef = await addDoc(messagesRef, messageData);
 
     // Update group's updatedAt
     await updateGroup(groupId, { updatedAt: new Date() });
