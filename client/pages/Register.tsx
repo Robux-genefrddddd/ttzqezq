@@ -58,6 +58,13 @@ export default function Register() {
 
         {/* Form Card */}
         <div className="bg-secondary/15 border border-border/15 rounded-lg p-6 space-y-5">
+          {error && (
+            <div className="flex items-center gap-2.5 p-3 bg-destructive/15 border border-destructive/30 rounded-lg">
+              <AlertCircle size={16} className="text-destructive flex-shrink-0" />
+              <p className="text-xs text-destructive">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-2">
@@ -76,6 +83,21 @@ export default function Register() {
                   required
                 />
               </div>
+            </div>
+
+            {/* Display Name */}
+            <div className="space-y-2">
+              <label htmlFor="displayName" className="block text-sm font-medium text-foreground">
+                Display Name (Optional)
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                placeholder="Your Full Name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border/30 rounded-lg text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent/50 transition-colors text-sm"
+              />
             </div>
 
             {/* Email */}
