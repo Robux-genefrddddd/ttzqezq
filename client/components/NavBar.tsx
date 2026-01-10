@@ -204,10 +204,13 @@ export function NavBar() {
                       alt={userProfile.username}
                       className="w-8 h-8 rounded-full object-cover"
                     />
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {userProfile.username}
-                      </p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-semibold text-foreground">
+                          {userProfile.username}
+                        </p>
+                        <RoleBadge role={userProfile.role} />
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {userProfile.email}
                       </p>
