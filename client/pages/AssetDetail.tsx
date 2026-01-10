@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Download, Heart, ArrowRight, Loader } from "lucide-react";
+import { Star, Download, Heart, ArrowRight, Loader, Trash2 } from "lucide-react";
 import { getAsset } from "@/lib/assetService";
 import { getUserProfile } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  getAssetReviews,
+  hasUserReviewedAsset,
+  getUserReviewForAsset,
+  createReview,
+  updateReview,
+  deleteReview,
+  type Review,
+} from "@/lib/reviewService";
+import { toast } from "sonner";
 import type { Asset } from "@/lib/assetService";
 
 export default function AssetDetail() {
