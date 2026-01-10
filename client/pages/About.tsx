@@ -5,12 +5,12 @@ export default function About() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="border-b border-border py-20 md:py-28">
+      <section className="border-b border-border/50 py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold">About AssetHub</h1>
-            <p className="text-xl text-muted-foreground">
-              Your trusted marketplace for premium digital assets and creative resources
+          <div className="max-w-3xl space-y-4">
+            <h1 className="text-4xl md:text-5xl font-bold">About AssetHub</h1>
+            <p className="text-base text-muted-foreground max-w-2xl">
+              A trusted digital asset marketplace for creators, developers, and studios.
             </p>
           </div>
         </div>
