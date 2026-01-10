@@ -1,539 +1,229 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { AssetCard } from "@/components/AssetCard";
-import { Asset, AssetFilter, AssetType } from "@/lib/types";
 import { Search, X } from "lucide-react";
+import { Asset, getPublishedAssets } from "@/lib/assetService";
 
-// Mock assets data
-const allAssets: Asset[] = [
-  {
-    id: "1",
-    name: "Modern UI Kit",
-    description: "A comprehensive UI kit for modern applications",
-    type: "asset",
-    imageUrl:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/1",
-    price: null,
-    category: "UI Design",
-    authorId: "author1",
-    authorName: "Design Pro",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop",
-    downloads: 2340,
-    rating: 4.8,
-    reviews: 127,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "2",
-    name: "3D Model Pack",
-    description: "High-quality 3D models for your projects",
-    type: "model",
-    imageUrl:
-      "https://images.unsplash.com/photo-1633356122544-f134324ef6cb?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/2",
-    price: 29.99,
-    category: "3D Models",
-    authorId: "author2",
-    authorName: "3D Master",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop",
-    downloads: 1560,
-    rating: 4.9,
-    reviews: 89,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "3",
-    name: "JavaScript Utilities",
-    description: "Essential JavaScript utilities and helpers",
-    type: "script",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/3",
-    price: null,
-    category: "Code",
-    authorId: "author3",
-    authorName: "Dev Scripts",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop",
-    downloads: 3120,
-    rating: 4.7,
-    reviews: 156,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "4",
-    name: "Animation Pack",
-    description: "Smooth and professional animations",
-    type: "asset",
-    imageUrl:
-      "https://images.unsplash.com/photo-1626921235308-f88c12b71d93?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/4",
-    price: 19.99,
-    category: "Animations",
-    authorId: "author4",
-    authorName: "Motion Design",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop",
-    downloads: 890,
-    rating: 4.6,
-    reviews: 72,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "5",
-    name: "React Components Library",
-    description: "Reusable React components for rapid development",
-    type: "script",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/5",
-    price: 49.99,
-    category: "Code",
-    authorId: "author5",
-    authorName: "React Dev",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop",
-    downloads: 1200,
-    rating: 4.9,
-    reviews: 98,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "6",
-    name: "Game Assets Bundle",
-    description: "Complete game assets for indie developers",
-    type: "asset",
-    imageUrl:
-      "https://images.unsplash.com/photo-1518611505868-48510c2e85ea?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/6",
-    price: null,
-    category: "Game Development",
-    authorId: "author6",
-    authorName: "Game Studio",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop",
-    downloads: 4560,
-    rating: 4.7,
-    reviews: 234,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "7",
-    name: "Character Rigging Service",
-    description: "Professional character rigging for animation",
-    type: "model",
-    imageUrl:
-      "https://images.unsplash.com/photo-1633356122544-f134324ef6cb?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/7",
-    price: 79.99,
-    category: "3D Models",
-    authorId: "author7",
-    authorName: "Animation Pro",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop",
-    downloads: 340,
-    rating: 5.0,
-    reviews: 45,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "8",
-    name: "Icon Set - 500 Icons",
-    description: "Comprehensive icon set for web and mobile",
-    type: "asset",
-    imageUrl:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-    productLink: "https://create.roblox.com/store/asset/8",
-    price: null,
-    category: "UI Design",
-    authorId: "author8",
-    authorName: "Icon Master",
-    authorAvatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop",
-    downloads: 5670,
-    rating: 4.8,
-    reviews: 312,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-const assetTypes: AssetType[] = [
-  "model",
-  "script",
-  "asset",
-  "resource",
-  "product",
-];
-const categories = [
-  "UI Design",
+const CATEGORIES = [
   "3D Models",
-  "Code",
+  "UI Design",
+  "Scripts",
   "Animations",
-  "Game Development",
+  "Plugins",
+  "Sounds",
+  "Images",
+  "Other",
 ];
 
 export default function Marketplace() {
+  const [allAssets, setAllAssets] = useState<Asset[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<AssetFilter>({
-    type: undefined,
-    category: undefined,
-    priceRange: "all",
-    sortBy: "newest",
-  });
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [sortBy, setSortBy] = useState("newest");
+  const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Filter and search assets
-  const filteredAssets = useMemo(() => {
-    let result = allAssets;
+  // Fetch assets from Firebase
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        const assets = await getPublishedAssets(
+          selectedCategory,
+          100
+        );
+        setAllAssets(assets);
+      } catch (error) {
+        console.error("Error fetching assets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Search filter
-    if (searchQuery) {
-      result = result.filter(
-        (asset) =>
-          asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          asset.description.toLowerCase().includes(searchQuery.toLowerCase()),
+    fetchAssets();
+  }, [selectedCategory]);
+
+  // Filter and sort assets
+  const filteredAssets = allAssets
+    .filter((asset) => {
+      if (!searchQuery) return true;
+      return (
+        asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        asset.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
-    }
-
-    // Type filter
-    if (filters.type) {
-      result = result.filter((asset) => asset.type === filters.type);
-    }
-
-    // Category filter
-    if (filters.category) {
-      result = result.filter((asset) => asset.category === filters.category);
-    }
-
-    // Price range filter
-    if (filters.priceRange === "free") {
-      result = result.filter(
-        (asset) => asset.price === null || asset.price === 0,
-      );
-    } else if (filters.priceRange === "paid") {
-      result = result.filter(
-        (asset) => asset.price !== null && asset.price > 0,
-      );
-    }
-
-    // Sort
-    if (filters.sortBy === "popular") {
-      result.sort((a, b) => b.downloads - a.downloads);
-    } else if (filters.sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating);
-    } else {
-      result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    }
-
-    return result;
-  }, [searchQuery, filters]);
-
-  const handleFilterChange = (
-    key: keyof AssetFilter,
-    value: string | undefined,
-  ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const clearFilters = () => {
-    setSearchQuery("");
-    setFilters({
-      type: undefined,
-      category: undefined,
-      priceRange: "all",
-      sortBy: "newest",
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "popular":
+          return b.downloads - a.downloads;
+        case "rating":
+          return b.rating - a.rating;
+        case "price-low":
+          return (a.price || 0) - (b.price || 0);
+        case "price-high":
+          return (b.price || 0) - (a.price || 0);
+        default: // newest
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
     });
-  };
-
-  const hasActiveFilters =
-    searchQuery ||
-    filters.type ||
-    filters.category ||
-    filters.priceRange !== "all" ||
-    filters.sortBy !== "newest";
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Page Header */}
-      <section className="border-b border-border/50 py-10 md:py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Marketplace</h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Browse thousands of assets created by our community. Filter by type,
-            category, or price.
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-2">Marketplace</h1>
+          <p className="text-lg text-muted-foreground">
+            Discover and download high-quality digital assets for your projects
           </p>
         </div>
-      </section>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar Filters - Desktop */}
-          <div className="hidden lg:block space-y-4">
-            <div>
-              <h3 className="font-semibold text-sm mb-4 flex items-center justify-between">
-                Filters
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </h3>
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+            <input
+              type="text"
+              placeholder="Search assets..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:border-primary transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <X size={20} className="text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </div>
 
-              {/* Search */}
-              <div className="mb-4">
-                <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    size={16}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                  />
-                </div>
-              </div>
-
-              {/* Type Filter */}
-              <div className="mb-4">
-                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                  Type
-                </label>
-                <select
-                  value={filters.type || ""}
-                  onChange={(e) =>
-                    handleFilterChange("type", e.target.value || undefined)
-                  }
-                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
-                >
-                  <option value="">All Types</option>
-                  {assetTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+        <div className="flex gap-6">
+          {/* Filters Sidebar */}
+          <aside
+            className={`${
+              mobileFiltersOpen ? "block" : "hidden"
+            } md:block w-full md:w-64 flex-shrink-0`}
+          >
+            <div className="bg-secondary/30 border border-border rounded-lg p-6 space-y-6 sticky top-24">
               {/* Category Filter */}
-              <div className="mb-4">
-                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                  Category
-                </label>
-                <select
-                  value={filters.category || ""}
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value || undefined)
-                  }
-                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
+              <div>
+                <h3 className="font-semibold text-foreground mb-4">Category</h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setSelectedCategory(undefined)}
+                    className={`block w-full text-left px-3 py-2 rounded transition-colors ${
+                      !selectedCategory
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    }`}
+                  >
+                    All Categories
+                  </button>
+                  {CATEGORIES.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`block w-full text-left px-3 py-2 rounded transition-colors ${
+                        selectedCategory === category
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                      }`}
+                    >
+                      {category}
+                    </button>
                   ))}
-                </select>
-              </div>
-
-              {/* Price Filter */}
-              <div className="mb-4">
-                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                  Price
-                </label>
-                <select
-                  value={filters.priceRange}
-                  onChange={(e) =>
-                    handleFilterChange("priceRange", e.target.value as any)
-                  }
-                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
-                >
-                  <option value="all">All Prices</option>
-                  <option value="free">Free Only</option>
-                  <option value="paid">Paid Only</option>
-                </select>
+                </div>
               </div>
 
               {/* Sort Filter */}
               <div>
-                <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                  Sort
-                </label>
+                <h3 className="font-semibold text-foreground mb-4">Sort By</h3>
                 <select
-                  value={filters.sortBy}
-                  onChange={(e) =>
-                    handleFilterChange("sortBy", e.target.value as any)
-                  }
-                  className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-3 py-2 bg-secondary/50 border border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-sm"
                 >
                   <option value="newest">Newest</option>
-                  <option value="popular">Popular</option>
+                  <option value="popular">Most Popular</option>
                   <option value="rating">Highest Rated</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
                 </select>
               </div>
+
+              {/* Close Mobile Filters */}
+              <button
+                onClick={() => setMobileFiltersOpen(false)}
+                className="md:hidden w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium"
+              >
+                Done
+              </button>
             </div>
-          </div>
-
-          {/* Mobile Filter Button */}
-          <div className="lg:hidden mb-4">
-            <button
-              onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-              className="w-full px-3 py-2 rounded-sm bg-secondary border border-border/50 font-medium text-sm hover:bg-secondary/80 transition-colors"
-            >
-              {mobileFiltersOpen ? "Hide Filters" : "Show Filters"}
-            </button>
-
-            {mobileFiltersOpen && (
-              <div className="mt-3 space-y-3 p-3 rounded-sm border border-border/50 bg-secondary/30">
-                <div>
-                  <div className="relative mb-4">
-                    <Search
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                      size={16}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                    />
-                  </div>
-
-                  <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                    Type
-                  </label>
-                  <select
-                    value={filters.type || ""}
-                    onChange={(e) =>
-                      handleFilterChange("type", e.target.value || undefined)
-                    }
-                    className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs mb-3"
-                  >
-                    <option value="">All Types</option>
-                    {assetTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                    Category
-                  </label>
-                  <select
-                    value={filters.category || ""}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "category",
-                        e.target.value || undefined,
-                      )
-                    }
-                    className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs mb-3"
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                    Price
-                  </label>
-                  <select
-                    value={filters.priceRange}
-                    onChange={(e) =>
-                      handleFilterChange("priceRange", e.target.value as any)
-                    }
-                    className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs mb-3"
-                  >
-                    <option value="all">All Prices</option>
-                    <option value="free">Free Only</option>
-                    <option value="paid">Paid Only</option>
-                  </select>
-
-                  <label className="text-xs font-medium block mb-2 uppercase tracking-wide text-muted-foreground">
-                    Sort
-                  </label>
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) =>
-                      handleFilterChange("sortBy", e.target.value as any)
-                    }
-                    className="w-full px-3 py-1.5 rounded-sm bg-secondary border border-border/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs"
-                  >
-                    <option value="newest">Newest</option>
-                    <option value="popular">Popular</option>
-                    <option value="rating">Highest Rated</option>
-                  </select>
-                </div>
-
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearFilters}
-                    className="w-full px-3 py-2 rounded-sm bg-secondary hover:bg-secondary/80 transition-colors font-medium text-xs"
-                  >
-                    Clear Filters
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          </aside>
 
           {/* Assets Grid */}
-          <div className="lg:col-span-3">
-            {/* Results Header */}
-            <div className="mb-6">
-              <h2 className="font-medium text-sm">
-                {filteredAssets.length} Asset
-                {filteredAssets.length !== 1 ? "s" : ""} Found
-              </h2>
-            </div>
+          <main className="flex-1">
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setMobileFiltersOpen(true)}
+              className="md:hidden mb-6 px-4 py-2 bg-secondary/50 border border-border rounded-lg font-medium w-full"
+            >
+              Filters & Sort
+            </button>
 
-            {/* Assets Grid */}
-            {filteredAssets.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAssets.map((asset) => (
-                  <AssetCard key={asset.id} asset={asset} />
-                ))}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center space-y-4">
+                  <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
+                  <p className="text-muted-foreground">Loading assets...</p>
+                </div>
+              </div>
+            ) : filteredAssets.length === 0 ? (
+              <div className="bg-secondary/30 border border-border rounded-lg p-12 text-center space-y-4">
+                <p className="text-lg text-muted-foreground">No assets found</p>
+                <p className="text-sm text-muted-foreground">
+                  Try adjusting your search or filters
+                </p>
               </div>
             ) : (
-              <div className="text-center py-12 border border-border/50 rounded-sm bg-secondary/30">
-                <h3 className="font-medium text-sm mb-2">No assets found</h3>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Try adjusting your filters or search query
-                </p>
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-1.5 rounded-sm bg-secondary hover:bg-secondary/80 transition-colors font-medium inline-flex items-center gap-1.5 text-xs"
-                >
-                  <X size={14} />
-                  Clear Filters
-                </button>
-              </div>
+              <>
+                <div className="mb-6 flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {filteredAssets.length} {filteredAssets.length === 1 ? "asset" : "assets"}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredAssets.map((asset) => {
+                    // Convert Asset to AssetCard format
+                    const cardData = {
+                      id: asset.id,
+                      name: asset.name,
+                      description: asset.description,
+                      type: "asset" as const,
+                      imageUrl: asset.imageUrl,
+                      productLink: "#",
+                      price: asset.price,
+                      category: asset.category,
+                      authorId: asset.authorId,
+                      authorName: asset.authorName,
+                      authorAvatar:
+                        asset.authorAvatar ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${asset.authorId}`,
+                      downloads: asset.downloads,
+                      rating: asset.rating,
+                      reviews: asset.reviews,
+                      createdAt: asset.createdAt,
+                      updatedAt: asset.updatedAt,
+                    };
+
+                    return <AssetCard key={asset.id} asset={cardData} />;
+                  })}
+                </div>
+              </>
             )}
-          </div>
+          </main>
         </div>
       </div>
     </div>
