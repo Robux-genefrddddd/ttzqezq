@@ -454,6 +454,15 @@ export default function Dashboard() {
                                   <Copy size={14} className="mr-2" />
                                   Update Files
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setScheduleUploadAsset(asset);
+                                    setScheduleUploadDialogOpen(true);
+                                  }}
+                                >
+                                  <Clock size={14} className="mr-2" />
+                                  Schedule Upload
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   onClick={() => handleTogglePublish(asset)}
