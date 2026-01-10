@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { AssetCard } from "@/components/AssetCard";
-import { Search, X } from "lucide-react";
+import { Search, X, Cube, Palette, Code, Zap, Music, Image as ImageIcon, MoreHorizontal, LayoutGrid } from "lucide-react";
 import { getPublishedAssets, type Asset } from "@/lib/assetService";
 
 const CATEGORIES = [
-  "3D Models",
-  "UI Design",
-  "Scripts",
-  "Animations",
-  "Plugins",
-  "Sounds",
-  "Images",
-  "Other",
+  { name: "3D Models", icon: Cube },
+  { name: "UI Design", icon: Palette },
+  { name: "Scripts", icon: Code },
+  { name: "Animations", icon: Zap },
+  { name: "Plugins", icon: LayoutGrid },
+  { name: "Sounds", icon: Music },
+  { name: "Images", icon: ImageIcon },
+  { name: "Other", icon: MoreHorizontal },
 ];
 
 export default function Marketplace() {
