@@ -12,36 +12,36 @@
    * Inspired by: Creator Hub, technical forums, developer platforms
    */
   :root {
-    /* Dark mode - tech/creator platform aesthetic */
-    --background: 210 11% 8%;
-    --foreground: 210 12% 92%;
+    /* Dark mode - tech/creator platform aesthetic (darker, more professional) */
+    --background: 210 10% 5%;
+    --foreground: 210 11% 94%;
 
-    --card: 210 11% 14%;
-    --card-foreground: 210 12% 92%;
+    --card: 210 10% 12%;
+    --card-foreground: 210 11% 94%;
 
-    --popover: 210 11% 14%;
-    --popover-foreground: 210 12% 92%;
+    --popover: 210 10% 12%;
+    --popover-foreground: 210 11% 94%;
 
-    --primary: 210 100% 55%;
-    --primary-foreground: 210 11% 8%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 210 10% 5%;
 
-    --secondary: 210 11% 22%;
-    --secondary-foreground: 210 12% 92%;
+    --secondary: 210 10% 18%;
+    --secondary-foreground: 210 11% 94%;
 
-    --muted: 210 10% 32%;
-    --muted-foreground: 210 8% 65%;
+    --muted: 210 9% 28%;
+    --muted-foreground: 210 7% 68%;
 
-    --accent: 210 100% 55%;
-    --accent-foreground: 210 11% 8%;
+    --accent: 210 100% 50%;
+    --accent-foreground: 210 10% 5%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 11% 8%;
+    --destructive-foreground: 210 10% 5%;
 
-    --border: 210 11% 22%;
-    --input: 210 11% 18%;
-    --ring: 210 100% 55%;
+    --border: 210 10% 18%;
+    --input: 210 10% 14%;
+    --ring: 210 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 210 11% 8%;
     --sidebar-foreground: 210 12% 92%;
