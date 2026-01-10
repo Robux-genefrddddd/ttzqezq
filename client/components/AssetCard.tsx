@@ -20,9 +20,9 @@ export function AssetCard({ asset }: AssetCardProps) {
   return (
     <Link to={`/asset/${asset.id}`}>
       <div className="group h-full">
-        <div className="overflow-hidden bg-secondary/15 border border-border/15 rounded-xl flex flex-col h-full transition-all duration-300 hover:border-border/30 hover:bg-secondary/20">
+        <div className="overflow-hidden border border-white/5 rounded-lg flex flex-col h-full transition-all duration-300 hover:border-white/15 hover:shadow-lg bg-white/[0.02] hover:bg-white/[0.04]">
           {/* Image Section */}
-          <div className="relative h-40 overflow-hidden bg-muted/20">
+          <div className="relative h-44 overflow-hidden bg-white/5">
             <img
               src={asset.imageUrl}
               alt={asset.name}
@@ -30,12 +30,12 @@ export function AssetCard({ asset }: AssetCardProps) {
             />
 
             {/* Price Badge */}
-            <div className="absolute top-2.5 right-2.5">
+            <div className="absolute top-3 right-3">
               <span
-                className={`px-2.5 py-1 rounded-md text-xs font-medium backdrop-blur-sm ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium backdrop-blur-md transition-all ${
                   isFree
-                    ? "bg-foreground/10 text-foreground/80"
-                    : "bg-accent/20 text-accent/90"
+                    ? "bg-white/15 text-foreground/90"
+                    : "bg-primary/25 text-primary/95"
                 }`}
               >
                 {isFree ? "Free" : `$${asset.price}`}
@@ -43,45 +43,45 @@ export function AssetCard({ asset }: AssetCardProps) {
             </div>
 
             {/* Type Badge */}
-            <div className="absolute top-2.5 left-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-background/50 backdrop-blur-sm text-foreground/70 capitalize">
+            <div className="absolute top-3 left-3">
+              <span className="px-3 py-1.5 rounded-md text-xs font-medium bg-white/15 backdrop-blur-md text-foreground/80 capitalize">
                 {asset.type}
               </span>
             </div>
           </div>
 
           {/* Content Section */}
-          <div className="p-3.5 flex flex-col flex-1">
+          <div className="p-4 flex flex-col flex-1">
             {/* Name */}
-            <div className="flex-1 mb-2.5">
-              <h3 className="font-medium text-sm line-clamp-2 text-foreground/95">
+            <div className="flex-1 mb-4">
+              <h3 className="font-medium text-sm line-clamp-2 text-foreground/95 leading-snug">
                 {asset.name}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1.5 capitalize">
+              <p className="text-xs text-muted-foreground/70 mt-2 capitalize">
                 {asset.category}
               </p>
             </div>
 
             {/* Stats */}
-            <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/10 pt-2.5 mb-2.5">
-              <div className="flex items-center gap-1">
-                <Star size={12} className="fill-accent/60 text-accent/60" />
+            <div className="flex items-center justify-between text-xs border-t border-white/5 pt-3 mb-3">
+              <div className="flex items-center gap-1.5">
+                <Star size={12} className="fill-primary/60 text-primary/60" />
                 <span className="font-medium text-foreground/85 text-xs">
                   {asset.rating.toFixed(1)}
                 </span>
-                <span className="text-muted-foreground/70 text-xs">
+                <span className="text-muted-foreground/60 text-xs">
                   ({asset.reviews})
                 </span>
               </div>
-              <div className="flex items-center gap-0.5 text-muted-foreground/70">
+              <div className="flex items-center gap-1 text-muted-foreground/60">
                 <Download size={12} />
                 <span className="text-xs">{asset.downloads}</span>
               </div>
             </div>
 
             {/* Author */}
-            <div className="flex items-center gap-1.5 border-t border-border/10 pt-2.5 mb-3">
-              <p className="text-xs text-muted-foreground/70 truncate">
+            <div className="flex items-center gap-2 border-t border-white/5 pt-3 mb-4">
+              <p className="text-xs text-muted-foreground/70 truncate flex-1">
                 {asset.authorName}
               </p>
             </div>
@@ -89,20 +89,20 @@ export function AssetCard({ asset }: AssetCardProps) {
             {/* Action Button */}
             <button
               onClick={isFree ? handleDownload : (e) => e.preventDefault()}
-              className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md font-medium transition-all duration-200 text-xs ${
+              className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg font-medium transition-all duration-200 text-xs ${
                 isFree
-                  ? "bg-secondary/30 border border-border/20 text-foreground/80 hover:bg-secondary/45 hover:border-border/30"
-                  : "bg-accent/10 text-accent/90 border border-accent/15 hover:bg-accent/15 hover:border-accent/25"
+                  ? "bg-white/8 border border-white/10 text-foreground/80 hover:bg-white/12 hover:border-white/15"
+                  : "bg-primary/20 text-primary/95 border border-primary/20 hover:bg-primary/25 hover:border-primary/30"
               }`}
             >
               {isFree ? (
                 <>
-                  <Download size={13} />
+                  <Download size={14} />
                   Download
                 </>
               ) : (
                 <>
-                  <Lock size={13} />
+                  <Lock size={14} />
                   Get Access
                 </>
               )}
