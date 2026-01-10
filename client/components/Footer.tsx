@@ -5,12 +5,12 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border/20 bg-background/50 mt-20">
-      <div className="container mx-auto px-4 py-10 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+    <footer className="border-t border-white/5 bg-background/50 mt-20">
+      <div className="container mx-auto px-6 py-12 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex items-center gap-2.5 mb-4">
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Roblox_Logo.svg/2048px-Roblox_Logo.svg.png"
                 alt="Roblox"
@@ -18,14 +18,14 @@ export function Footer() {
               />
               <span className="font-semibold text-sm">RbxAssets</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground/80 leading-relaxed">
               Digital marketplace for creators, developers, and studios.
             </p>
           </div>
 
           {/* Studios */}
           <div>
-            <h4 className="font-semibold mb-3 text-foreground text-xs uppercase tracking-wide">
+            <h4 className="font-semibold mb-4 text-foreground text-xs uppercase tracking-widest">
               Studios
             </h4>
             <ul className="space-y-1.5">
