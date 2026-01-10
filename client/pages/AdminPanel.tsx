@@ -117,6 +117,12 @@ export default function AdminPanel() {
       // Fetch audit logs
       const logs = await getAuditLogs();
       setAuditLogs(logs as AuditLog[]);
+
+      // Fetch broadcast messages (founder only)
+      if (userProfile?.role === "founder") {
+        const messages = await getAllBroadcastMessages();
+        setBroadcastMessages(messages);
+      }
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Failed to load admin data");
