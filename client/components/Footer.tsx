@@ -23,6 +23,31 @@ export function Footer() {
             </p>
           </div>
 
+          {/* Studios */}
+          <div>
+            <h4 className="font-semibold mb-3 text-foreground text-xs uppercase tracking-wide">
+              Studios
+            </h4>
+            <ul className="space-y-1.5">
+              <li>
+                <a
+                  href="#"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Create
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Publish
+                </a>
+              </li>
+            </ul>
+          </div>
+
           {/* Product */}
           <div>
             <h4 className="font-semibold mb-3 text-foreground text-xs uppercase tracking-wide">
