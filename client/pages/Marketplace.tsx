@@ -427,31 +427,31 @@ export default function Marketplace() {
           {/* Assets Grid */}
           <div className="lg:col-span-3">
             {/* Results Header */}
-            <div className="mb-8">
-              <h2 className="font-semibold text-lg">
+            <div className="mb-6">
+              <h2 className="font-medium text-sm">
                 {filteredAssets.length} Asset{filteredAssets.length !== 1 ? "s" : ""} Found
               </h2>
             </div>
 
             {/* Assets Grid */}
             {filteredAssets.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredAssets.map((asset) => (
                   <AssetCard key={asset.id} asset={asset} />
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 border border-border rounded-lg bg-card/50">
-                <h3 className="font-semibold text-lg mb-2">No assets found</h3>
-                <p className="text-muted-foreground mb-6">
+              <div className="text-center py-12 border border-border/50 rounded-sm bg-secondary/30">
+                <h3 className="font-medium text-sm mb-2">No assets found</h3>
+                <p className="text-xs text-muted-foreground mb-4">
                   Try adjusting your filters or search query
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-2 rounded-lg bg-secondary hover:bg-muted transition-colors font-medium inline-flex items-center gap-2"
+                  className="px-4 py-1.5 rounded-sm bg-secondary hover:bg-secondary/80 transition-colors font-medium inline-flex items-center gap-1.5 text-xs"
                 >
-                  <X size={18} />
-                  Clear All Filters
+                  <X size={14} />
+                  Clear Filters
                 </button>
               </div>
             )}
