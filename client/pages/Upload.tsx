@@ -268,7 +268,7 @@ export default function Upload() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Step 1: Files & Banner */}
             {currentStep === 0 && (
               <UploadStep1
