@@ -1,22 +1,41 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, User, ArrowRight, AlertCircle } from "lucide-react";
+import { registerUser } from "@/lib/auth";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (password !== confirmPassword) {
-      alert("Passwords don't match");
+      setError("Passwords don't match");
       return;
     }
+
+    if (username.length < 3) {
+      setError("Username must be at least 3 characters");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+    try {
+      await registerUser(email, password, username, displayName || username);
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Failed to create account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
