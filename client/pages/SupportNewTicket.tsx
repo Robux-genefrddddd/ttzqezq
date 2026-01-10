@@ -16,13 +16,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createTicket, TicketCategory } from "@/lib/ticketService";
 import { toast } from "sonner";
 
-const CATEGORIES: { id: TicketCategory; name: string; icon: string }[] = [
-  { id: "bug-report", name: "Bug Report", icon: "🐛" },
-  { id: "account-issue", name: "Account Issue", icon: "👤" },
-  { id: "payment", name: "Payment Issue", icon: "💳" },
-  { id: "content-removal", name: "Content Removal", icon: "🚫" },
-  { id: "abuse-report", name: "Abuse Report", icon: "⚠️" },
-  { id: "other", name: "Other", icon: "❓" },
+const CATEGORIES: { id: TicketCategory; name: string }[] = [
+  { id: "bug-report", name: "Bug Report" },
+  { id: "account-issue", name: "Account Issue" },
+  { id: "payment", name: "Payment Issue" },
+  { id: "content-removal", name: "Content Removal" },
+  { id: "abuse-report", name: "Abuse Report" },
+  { id: "other", name: "Other" },
 ];
 
 export default function SupportNewTicket() {
