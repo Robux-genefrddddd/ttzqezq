@@ -414,14 +414,14 @@ export default function Upload() {
             )}
 
             {/* Navigation */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-2.5 pt-3">
               {currentStep > 0 && (
                 <button
                   type="button"
                   onClick={handlePrevious}
-                  className="flex-1 py-2.5 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:bg-secondary/80 transition-all flex items-center justify-center gap-2 text-sm"
+                  className="flex-1 py-2 bg-secondary/20 text-secondary-foreground font-medium rounded-lg hover:bg-secondary/30 flex items-center justify-center gap-1.5 text-xs border border-border/20"
                 >
-                  <ArrowLeft size={14} />
+                  <ArrowLeft size={12} />
                   Back
                 </button>
               )}
@@ -430,19 +430,19 @@ export default function Upload() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="flex-1 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 text-sm"
+                  className="flex-1 py-2 bg-primary/30 text-primary/80 font-medium rounded-lg hover:bg-primary/40 flex items-center justify-center gap-1.5 text-xs border border-primary/20"
                 >
                   Next
-                  <ArrowRight size={14} />
+                  <ArrowRight size={12} />
                 </button>
               ) : (
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-sm"
+                  className="flex-1 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 text-xs"
                 >
                   {isSubmitting ? "Publishing..." : "Publish Asset"}
-                  {!isSubmitting && <ArrowRight size={14} />}
+                  {!isSubmitting && <ArrowRight size={12} />}
                 </button>
               )}
             </div>
