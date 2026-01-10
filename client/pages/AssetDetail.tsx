@@ -310,8 +310,13 @@ export default function AssetDetail() {
 
             {/* Action Buttons */}
             <div className="space-y-2 pt-2">
-              <button className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-all">
-                Download Asset
+              <button
+                onClick={handleDownloadAsset}
+                disabled={downloading}
+                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              >
+                <FileDown size={14} />
+                {downloading ? "Downloading..." : "Download Asset"}
               </button>
               <button className="w-full py-2.5 rounded-lg bg-secondary border border-border/30 font-medium text-sm hover:bg-secondary/80 transition-all flex items-center justify-center gap-2">
                 <Heart size={14} />
