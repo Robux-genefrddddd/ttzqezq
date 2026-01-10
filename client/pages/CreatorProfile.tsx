@@ -31,9 +31,12 @@ export default function CreatorProfile() {
 
         setCreator(profile);
 
-        // Fetch creator's public assets
-        const creatorAssets = await getUserAssets(id);
-        setAssets(creatorAssets);
+        // Fetch creator's public assets (published only)
+        const allAssets = await getUserAssets(id);
+        const publishedAssets = allAssets.filter(
+          (asset) => asset.status === "published"
+        );
+        setAssets(publishedAssets);
       } catch (err) {
         console.error("Error loading creator profile:", err);
         setError("Failed to load creator profile");
