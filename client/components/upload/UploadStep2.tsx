@@ -87,7 +87,7 @@ export function UploadStep2({
           Category <span className="text-destructive">*</span>
         </label>
         <Select value={category} onValueChange={onCategoryChange}>
-          <SelectTrigger className="bg-background border-border/30">
+          <SelectTrigger className="bg-[#1e1e1e] border-white/8 hover:border-white/15">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>

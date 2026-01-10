@@ -135,7 +135,7 @@ export default function SupportNewTicket() {
                 value={category}
                 onValueChange={(value) => setCategory(value as TicketCategory)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-[#1e1e1e] border-white/8 hover:border-white/15">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
