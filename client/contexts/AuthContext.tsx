@@ -10,6 +10,7 @@ interface UserProfile {
   profileImage?: string;
   createdAt: Date;
   memberRank?: "starter" | "creator" | "pro" | "studio";
+  role?: "member" | "partner" | "admin" | "founder";
 }
 
 interface AuthContextType {
