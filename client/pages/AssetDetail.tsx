@@ -351,101 +351,165 @@ export default function AssetDetail() {
   const priceLabel =
     asset.price && asset.price > 0 ? `$${asset.price.toFixed(2)}` : "Free";
 
+  const copyAssetLink = () => {
+    const link = `${window.location.origin}/asset/${asset.id}`;
+    navigator.clipboard.writeText(link);
+    toast.success("Asset link copied to clipboard");
+  };
+
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {/* Banner Image */}
-          <div className="md:col-span-2 flex justify-center">
-            <div className="rounded-lg overflow-hidden bg-muted w-full max-w-2xl h-80 border border-border/30">
-              <img
-                src={asset.imageUrl}
-                alt={asset.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+    <div className="min-h-screen bg-background py-6">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Header with Image & Metadata */}
+        <div className="grid lg:grid-cols-[1fr_380px] gap-6 mb-8">
+          {/* Asset Image */}
+          <div className="relative rounded-lg overflow-hidden bg-muted border border-border/20 h-96 lg:h-full min-h-80">
+            <img
+              src={asset.imageUrl}
+              alt={asset.name}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Top-right action menu */}
+            <TooltipProvider>
+              <div className="absolute top-3 right-3 flex items-center gap-2">
+                {/* Price Badge */}
+                <span
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium ${
+                    asset.price && asset.price > 0
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-accent/20 text-accent"
+                  }`}
+                >
+                  {priceLabel}
+                </span>
+
+                {/* 3-dot Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-2 rounded-lg bg-black/40 hover:bg-black/60 text-white transition-colors backdrop-blur-sm border border-white/10">
+                      <MoreVertical size={16} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleToggleFavorite}>
+                      <Heart
+                        size={14}
+                        className="mr-2"
+                        fill={isFav ? "currentColor" : "none"}
+                      />
+                      {isFav ? "Remove from Favorites" : "Add to Favorites"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={copyAssetLink}>
+                      <Copy size={14} className="mr-2" />
+                      Copy Link
+                    </DropdownMenuItem>
+                    {user && user.uid === asset.authorId && (
+                      <>
+                        <hr className="my-1" />
+                        <DropdownMenuItem
+                          onClick={handleDeleteAsset}
+                          disabled={deletingAsset}
+                          className="text-red-400 focus:text-red-400"
+                        >
+                          <Trash2 size={14} className="mr-2" />
+                          {deletingAsset ? "Deleting..." : "Delete Asset"}
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </TooltipProvider>
           </div>
 
-          {/* Info Panel */}
-          <div className="space-y-4">
-            {/* Price Badge */}
-            <div>
-              <span
-                className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                  asset.price && asset.price > 0
-                    ? "bg-green-500/15 text-green-400"
-                    : "bg-accent/15 text-accent"
-                }`}
-              >
-                {priceLabel}
-              </span>
-            </div>
-
+          {/* Metadata Panel */}
+          <div className="flex flex-col gap-4">
             {/* Title & Rating */}
             <div>
-              <h1 className="text-2xl font-bold mb-2">{asset.name}</h1>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <h1 className="text-2xl font-bold mb-2 leading-tight">
+                {asset.name}
+              </h1>
+              <div className="flex items-center gap-3 text-sm">
                 <div className="flex items-center gap-1">
-                  <Star size={14} className="fill-accent text-accent" />
-                  <span className="font-medium">{asset.rating.toFixed(1)}</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={14}
+                        className={
+                          star <= Math.round(asset.rating)
+                            ? "fill-accent text-accent"
+                            : "text-muted-foreground/20"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="font-semibold">{asset.rating.toFixed(1)}</span>
+                  <span className="text-muted-foreground">
+                    ({asset.reviews})
+                  </span>
                 </div>
-                <span>({asset.reviews} reviews)</span>
               </div>
             </div>
 
-            {/* Category */}
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Category</p>
-              <p className="text-sm font-medium text-foreground">
-                {asset.category}
-              </p>
-            </div>
-
-            {/* Stats */}
-            <div className="border-t border-b border-border/20 py-3 space-y-2">
-              <div className="flex items-center justify-between text-sm">
+            {/* Quick Stats */}
+            <div className="space-y-2 border-t border-border/20 pt-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Category</span>
+                <span className="font-medium">{asset.category}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Downloads</span>
                 <div className="flex items-center gap-1.5">
-                  <Download size={14} />
+                  <Download size={12} />
                   <span className="font-medium">{asset.downloads}</span>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-2 pt-2">
-              <button
-                onClick={handleDownloadAsset}
-                disabled={downloading}
-                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-              >
-                <FileDown size={14} />
-                {downloading ? "Downloading..." : "Download Asset"}
-              </button>
-              <button
-                onClick={handleToggleFavorite}
-                className={`w-full py-2.5 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                  isFav
-                    ? "bg-accent/20 border border-accent/30 text-accent hover:bg-accent/30"
-                    : "bg-secondary border border-border/30 text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                <Heart size={14} fill={isFav ? "currentColor" : "none"} />
-                {isFav ? "Saved" : "Save Asset"}
-              </button>
+            {/* Primary Download Button */}
+            <button
+              onClick={handleDownloadAsset}
+              disabled={downloading}
+              className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 mt-auto"
+            >
+              <FileDown size={14} />
+              {downloading ? "Downloading..." : "Download"}
+            </button>
 
-              {/* Delete Button (only for asset author) */}
-              {user && user.uid === asset.authorId && (
-                <button
-                  onClick={handleDeleteAsset}
-                  disabled={deletingAsset}
-                  className="w-full py-2.5 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 font-medium text-sm hover:bg-red-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-                >
-                  <Trash2 size={14} />
-                  {deletingAsset ? "Deleting..." : "Delete Asset"}
-                </button>
-              )}
-            </div>
+            {/* Creator Preview */}
+            {authorProfile && (
+              <div className="pt-2 border-t border-border/20">
+                <p className="text-xs text-muted-foreground mb-2">Creator</p>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={
+                      authorProfile.profileImage ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${authorProfile.username}`
+                    }
+                    alt={authorProfile.username}
+                    className="w-8 h-8 rounded object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate">
+                      {authorProfile.displayName}
+                    </p>
+                    {authorProfile.role && (
+                      <span className="text-xs text-muted-foreground capitalize">
+                        {authorProfile.role}
+                      </span>
+                    )}
+                  </div>
+                  <Link
+                    to={`/creator/${authorProfile.uid}`}
+                    className="text-xs font-medium text-accent hover:text-accent/80 transition-colors whitespace-nowrap"
+                  >
+                    View
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
