@@ -8,15 +8,18 @@ import {
   Eye,
   AlertCircle,
   Clock,
+  Search,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { logoutUser } from "@/lib/auth";
-import { getUserProfile, updateUserProfile } from "@/lib/auth";
+import { logoutUser, updateUserProfile } from "@/lib/auth";
 import { logAction, getAuditLogs } from "@/lib/auditService";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 interface User {
   uid: string;
@@ -67,11 +70,26 @@ export default function AdminPanel() {
   const loadData = async () => {
     try {
       setLoading(true);
+
+      // Fetch all users
+      const usersCollection = collection(db, "users");
+      const usersSnapshot = await getDocs(usersCollection);
+      const allUsers: User[] = usersSnapshot.docs.map((doc) => ({
+        uid: doc.id,
+        username: doc.data().username,
+        displayName: doc.data().displayName,
+        email: doc.data().email,
+        role: doc.data().role,
+        isBanned: doc.data().isBanned || false,
+        banReason: doc.data().banReason,
+        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+      }));
+
+      setUsers(allUsers);
+
+      // Fetch audit logs
       const logs = await getAuditLogs();
       setAuditLogs(logs as AuditLog[]);
-
-      // In a real app, you'd fetch all users from Firestore
-      // For now, we'll show a placeholder
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Failed to load admin data");
@@ -140,18 +158,26 @@ export default function AdminPanel() {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
-  if (loading) {
+  // Filter users based on search
+  const filteredUsers = users.filter((u) =>
+    u.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (!userProfile || (userProfile.role !== "founder" && userProfile.role !== "admin")) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading admin panel...</p>
+          <AlertCircle size={48} className="mx-auto text-destructive" />
+          <h1 className="text-2xl font-bold">Access Denied</h1>
+          <p className="text-muted-foreground">You don't have permission to access this panel</p>
         </div>
       </div>
     );
@@ -163,202 +189,239 @@ export default function AdminPanel() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <AlertCircle className="text-red-400" />
+            <h1 className="text-4xl font-bold flex items-center gap-2">
+              <Shield size={32} className="text-primary" />
               Admin Panel
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage users, moderation, and audit logs
+            <p className="text-muted-foreground mt-1">
+              Manage users and view audit logs
             </p>
           </div>
-          <button
+          <Button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors font-medium"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
-            <LogOut size={18} />
+            <LogOut size={16} className="mr-2" />
             Sign Out
-          </button>
+          </Button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-border">
+        <div className="flex gap-4 mb-6 border-b border-border/20">
           <button
             onClick={() => setActiveTab("users")}
-            className={`pb-3 px-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+            className={`px-4 py-3 font-medium border-b-2 transition-colors ${
               activeTab === "users"
-                ? "border-b-2 border-primary text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Users size={16} />
-            Users & Moderation
+            <Users size={18} className="inline mr-2" />
+            Users ({users.length})
           </button>
           <button
             onClick={() => setActiveTab("logs")}
-            className={`pb-3 px-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+            className={`px-4 py-3 font-medium border-b-2 transition-colors ${
               activeTab === "logs"
-                ? "border-b-2 border-primary text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Clock size={16} />
+            <Clock size={18} className="inline mr-2" />
             Audit Logs
           </button>
         </div>
 
-        {/* Users Tab */}
-        {activeTab === "users" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* User List */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="bg-secondary/30 border border-border rounded-lg p-4">
-                <h2 className="text-lg font-semibold mb-4">Users</h2>
-                <Input
-                  placeholder="Search users by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="mb-4"
-                />
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {/* Placeholder for users list */}
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-sm">
-                      User list will be populated from Firestore
-                    </p>
-                  </div>
-                </div>
-              </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        ) : activeTab === "users" ? (
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
 
-            {/* User Details / Ban Form */}
-            <div className="bg-secondary/30 border border-border rounded-lg p-4">
-              <h2 className="text-lg font-semibold mb-4">User Actions</h2>
-              {selectedUser ? (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-semibold">{selectedUser.displayName}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="text-sm">{selectedUser.email}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Role</p>
-                    <p className="text-sm capitalize">{selectedUser.role}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <p
-                      className={`text-sm font-semibold ${
-                        selectedUser.isBanned
-                          ? "text-red-400"
-                          : "text-green-400"
-                      }`}
-                    >
-                      {selectedUser.isBanned ? "🔴 BANNED" : "🟢 ACTIVE"}
-                    </p>
-                  </div>
-
-                  {selectedUser.isBanned ? (
-                    <>
-                      <div className="space-y-2">
+            {/* Users Grid */}
+            <div className="grid gap-4">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No users found
+                </div>
+              ) : (
+                filteredUsers.map((u) => (
+                  <div
+                    key={u.uid}
+                    className="p-4 bg-secondary/15 border border-border/30 rounded-lg hover:border-border/60 transition-all cursor-pointer"
+                    onClick={() => setSelectedUser(u)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground">
+                          {u.displayName}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
-                          Ban Reason
+                          @{u.username} • {u.email}
                         </p>
-                        <p className="text-sm">{selectedUser.banReason}</p>
+                        <div className="flex gap-2 mt-2">
+                          <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded capitalize font-medium">
+                            {u.role}
+                          </span>
+                          {u.isBanned && (
+                            <span className="px-2 py-1 bg-destructive/20 text-destructive text-xs rounded font-medium">
+                              BANNED
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedUser(u);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        <Eye size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* User Details Modal */}
+            {selectedUser && (
+              <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="bg-card border border-border/30 rounded-lg max-w-md w-full p-6 space-y-4">
+                  <h2 className="text-xl font-bold">User Details</h2>
+
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Name</p>
+                      <p className="font-medium text-foreground">{selectedUser.displayName}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Username</p>
+                      <p className="font-medium text-foreground">@{selectedUser.username}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Email</p>
+                      <p className="font-medium text-foreground">{selectedUser.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Role</p>
+                      <p className="font-medium text-foreground capitalize">{selectedUser.role}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Created</p>
+                      <p className="font-medium text-foreground">
+                        {selectedUser.createdAt.toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedUser.isBanned && (
+                    <div className="p-3 bg-destructive/15 border border-destructive/30 rounded-lg">
+                      <p className="text-xs font-semibold text-destructive mb-1">
+                        BAN REASON
+                      </p>
+                      <p className="text-xs text-destructive">
+                        {selectedUser.banReason || "No reason provided"}
+                      </p>
+                    </div>
+                  )}
+
+                  {!selectedUser.isBanned ? (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Ban Reason</label>
+                        <Textarea
+                          value={banReason}
+                          onChange={(e) => setBanReason(e.target.value)}
+                          placeholder="Enter ban reason..."
+                          rows={3}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleBanUser(selectedUser)}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          <Ban size={16} className="mr-2" />
+                          Ban User
+                        </Button>
+                        <Button
+                          onClick={() => setSelectedUser(null)}
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
                         onClick={() => handleUnbanUser(selectedUser)}
-                        className="w-full bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700"
                       >
                         <RotateCcw size={16} className="mr-2" />
                         Unban User
                       </Button>
-                    </>
-                  ) : (
-                    <div className="space-y-3 pt-4 border-t border-border">
-                      <Textarea
-                        placeholder="Enter ban reason..."
-                        value={banReason}
-                        onChange={(e) => setBanReason(e.target.value)}
-                        className="resize-none"
-                        rows={3}
-                      />
                       <Button
-                        onClick={() => handleBanUser(selectedUser)}
-                        className="w-full bg-red-600 hover:bg-red-700"
+                        onClick={() => setSelectedUser(null)}
+                        variant="outline"
                       >
-                        <Ban size={16} className="mr-2" />
-                        Ban User
+                        Close
                       </Button>
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Eye
-                    className="mx-auto text-muted-foreground mb-2"
-                    size={32}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Select a user to view details
-                  </p>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Audit Logs Tab */}
-        {activeTab === "logs" && (
-          <div className="bg-secondary/30 border border-border rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-4">Audit Logs</h2>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {auditLogs.length > 0 ? (
-                auditLogs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="p-3 bg-secondary/50 rounded-lg text-sm space-y-1"
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold capitalize">
+        ) : (
+          <div className="space-y-4">
+            {auditLogs.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No audit logs yet
+              </div>
+            ) : (
+              auditLogs.map((log) => (
+                <div
+                  key={log.id}
+                  className="p-4 bg-secondary/15 border border-border/30 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium text-foreground capitalize">
                         {log.action.replace("_", " ")}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {log.timestamp.toLocaleDateString()}{" "}
-                        {log.timestamp.toLocaleTimeString()}
+                      <p className="text-sm text-muted-foreground">
+                        By {log.performedByName}
+                        {log.targetUserName && ` → ${log.targetUserName}`}
                       </p>
+                      {log.reason && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Reason: {log.reason}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      By:{" "}
-                      <span className="text-foreground">
-                        {log.performedByName}
-                      </span>
+                    <p className="text-xs text-muted-foreground whitespace-nowrap ml-4">
+                      {log.timestamp.toLocaleDateString()}{" "}
+                      {log.timestamp.toLocaleTimeString()}
                     </p>
-                    {log.targetUserName && (
-                      <p className="text-xs text-muted-foreground">
-                        User:{" "}
-                        <span className="text-foreground">
-                          {log.targetUserName}
-                        </span>
-                      </p>
-                    )}
-                    {log.reason && (
-                      <p className="text-xs text-muted-foreground italic">
-                        Reason: {log.reason}
-                      </p>
-                    )}
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground">
-                    No audit logs yet
-                  </p>
                 </div>
-              )}
-            </div>
+              ))
+            )}
           </div>
         )}
       </div>
