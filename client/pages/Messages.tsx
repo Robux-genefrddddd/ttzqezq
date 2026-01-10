@@ -42,15 +42,15 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header - Fixed at top */}
+      <div className="border-b border-border/20 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3">
             <Mail size={32} className="text-primary" />
             <div>
-              <h1 className="text-4xl font-bold text-foreground">Messages</h1>
-              <p className="text-muted-foreground mt-2">
+              <h1 className="text-3xl font-bold text-foreground">Messages</h1>
+              <p className="text-muted-foreground text-sm mt-1">
                 Group invitations and notifications
               </p>
             </div>
@@ -58,33 +58,35 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* Messages Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {displayedInvites.length === 0 ? (
-          <div className="text-center py-12">
-            <Mail
-              size={48}
-              className="text-muted-foreground mx-auto mb-4 opacity-50"
-            />
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              No messages yet
-            </h2>
-            <p className="text-muted-foreground">
-              You haven't received any group invitations yet.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {displayedInvites.map((invite) => (
-              <GroupInviteMessage
-                key={invite.id}
-                invite={invite}
-                onAccepted={handleInviteAccepted}
-                onDeclined={handleInviteDeclined}
+      {/* Messages Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {displayedInvites.length === 0 ? (
+            <div className="text-center py-12">
+              <Mail
+                size={48}
+                className="text-muted-foreground mx-auto mb-4 opacity-50"
               />
-            ))}
-          </div>
-        )}
+              <h2 className="text-xl font-semibold text-foreground mb-2">
+                No messages yet
+              </h2>
+              <p className="text-muted-foreground">
+                You haven't received any group invitations yet.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {displayedInvites.map((invite) => (
+                <GroupInviteMessage
+                  key={invite.id}
+                  invite={invite}
+                  onAccepted={handleInviteAccepted}
+                  onDeclined={handleInviteDeclined}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
