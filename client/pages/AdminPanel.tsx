@@ -386,7 +386,7 @@ export default function AdminPanel() {
                           )}
                           {u.isBanned && (
                             <span className="px-2 py-1 bg-destructive/20 text-destructive text-xs rounded font-medium">
-                              🚫 BANNED
+                              BANNED
                             </span>
                           )}
                         </div>
