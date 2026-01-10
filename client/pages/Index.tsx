@@ -172,11 +172,28 @@ export default function Index() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredAssets.map((asset) => (
-              <AssetCard key={asset.id} asset={asset} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-64 bg-secondary/20 border border-border/20 rounded-2xl animate-pulse"
+                />
+              ))}
+            </div>
+          ) : featuredAssets.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {featuredAssets.map((asset) => (
+                <AssetCard key={asset.id} asset={asset} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                No featured assets available yet
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </div>
