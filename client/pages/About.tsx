@@ -91,11 +91,11 @@ export default function About() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="border-b border-border/50 py-12 md:py-16">
+      <section className="border-b border-border/50 py-8 md:py-10">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold">About RbxAssets</h1>
-            <p className="text-base text-muted-foreground max-w-2xl">
+          <div className="max-w-3xl space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold">About RbxAssets</h1>
+            <p className="text-sm text-muted-foreground max-w-2xl">
               A trusted digital asset marketplace for creators, developers, and
               studios.
             </p>
