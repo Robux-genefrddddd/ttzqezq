@@ -30,6 +30,7 @@ export default function AssetDetail() {
   const [rating, setRating] = useState(5);
   const [reviewMessage, setReviewMessage] = useState("");
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const fetchAssetDetails = async () => {
