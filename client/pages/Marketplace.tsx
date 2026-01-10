@@ -200,31 +200,9 @@ export default function Marketplace() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAssets.map((asset) => {
-                    // Convert Asset to AssetCard format
-                    const cardData = {
-                      id: asset.id,
-                      name: asset.name,
-                      description: asset.description,
-                      type: "asset" as const,
-                      imageUrl: asset.imageUrl,
-                      productLink: "#",
-                      price: asset.price,
-                      category: asset.category,
-                      authorId: asset.authorId,
-                      authorName: asset.authorName,
-                      authorAvatar:
-                        asset.authorAvatar ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${asset.authorId}`,
-                      downloads: asset.downloads,
-                      rating: asset.rating,
-                      reviews: asset.reviews,
-                      createdAt: asset.createdAt,
-                      updatedAt: asset.updatedAt,
-                    };
-
-                    return <AssetCard key={asset.id} asset={cardData} />;
-                  })}
+                  {filteredAssets.map((asset) => (
+                    <AssetCard key={asset.id} asset={asset} />
+                  ))}
                 </div>
               </>
             )}
