@@ -2,7 +2,21 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Menu, X, LogOut, Users, Mail, Shield, Search, Info as InfoIcon, FileUp, BarChart3, MessageSquare, Lock, Plus } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  Users,
+  Mail,
+  Shield,
+  Search,
+  Info as InfoIcon,
+  FileUp,
+  BarChart3,
+  MessageSquare,
+  Lock,
+  Plus,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { logoutUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -123,9 +137,15 @@ export function NavBar() {
               className="p-2 hover:bg-secondary/40 rounded-lg transition-all duration-200 flex-shrink-0 group"
             >
               {menuOpen ? (
-                <X size={20} className="text-foreground group-hover:text-primary transition-colors" />
+                <X
+                  size={20}
+                  className="text-foreground group-hover:text-primary transition-colors"
+                />
               ) : (
-                <Menu size={20} className="text-foreground group-hover:text-primary transition-colors" />
+                <Menu
+                  size={20}
+                  className="text-foreground group-hover:text-primary transition-colors"
+                />
               )}
             </button>
             <Link to="/" className="flex items-center gap-2">
@@ -271,7 +291,9 @@ export function NavBar() {
                     transition={{ delay: 0.1, duration: 0.3 }}
                     className="px-6 py-6 border-b border-border/20 bg-background/50"
                   >
-                    <h2 className="text-lg font-bold text-foreground">Navigation</h2>
+                    <h2 className="text-lg font-bold text-foreground">
+                      Navigation
+                    </h2>
                     <p className="text-xs text-muted-foreground mt-1">
                       Browse & manage
                     </p>
@@ -301,8 +323,13 @@ export function NavBar() {
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group"
                             onClick={closeMenu}
                           >
-                            <Search size={18} className="text-muted-foreground group-hover:text-primary" />
-                            <span className="text-sm font-medium">Marketplace</span>
+                            <Search
+                              size={18}
+                              className="text-muted-foreground group-hover:text-primary"
+                            />
+                            <span className="text-sm font-medium">
+                              Marketplace
+                            </span>
                           </Link>
                         </motion.div>
                         <motion.div
@@ -316,7 +343,10 @@ export function NavBar() {
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group"
                             onClick={closeMenu}
                           >
-                            <Mail size={18} className="text-muted-foreground group-hover:text-primary" />
+                            <Mail
+                              size={18}
+                              className="text-muted-foreground group-hover:text-primary"
+                            />
                             <span className="text-sm font-medium">Support</span>
                           </Link>
                         </motion.div>
@@ -331,7 +361,10 @@ export function NavBar() {
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group"
                             onClick={closeMenu}
                           >
-                            <InfoIcon size={18} className="text-muted-foreground group-hover:text-primary" />
+                            <InfoIcon
+                              size={18}
+                              className="text-muted-foreground group-hover:text-primary"
+                            />
                             <span className="text-sm font-medium">About</span>
                           </Link>
                         </motion.div>
@@ -387,8 +420,13 @@ export function NavBar() {
                                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group"
                                 onClick={closeMenu}
                               >
-                                <BarChart3 size={18} className="text-muted-foreground group-hover:text-primary" />
-                                <span className="text-sm font-medium">Dashboard</span>
+                                <BarChart3
+                                  size={18}
+                                  className="text-muted-foreground group-hover:text-primary"
+                                />
+                                <span className="text-sm font-medium">
+                                  Dashboard
+                                </span>
                               </Link>
                             </motion.div>
                             <motion.div
@@ -403,7 +441,9 @@ export function NavBar() {
                                 onClick={closeMenu}
                               >
                                 <FileUp size={18} className="text-primary" />
-                                <span className="text-sm font-semibold">Upload Asset</span>
+                                <span className="text-sm font-semibold">
+                                  Upload Asset
+                                </span>
                               </Link>
                             </motion.div>
                           </div>
@@ -430,8 +470,13 @@ export function NavBar() {
                                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group"
                                 onClick={closeMenu}
                               >
-                                <Users size={18} className="text-muted-foreground group-hover:text-primary" />
-                                <span className="text-sm font-medium">Groups</span>
+                                <Users
+                                  size={18}
+                                  className="text-muted-foreground group-hover:text-primary"
+                                />
+                                <span className="text-sm font-medium">
+                                  Groups
+                                </span>
                               </Link>
                             </motion.div>
                             <motion.div
@@ -445,8 +490,13 @@ export function NavBar() {
                                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group relative"
                                 onClick={closeMenu}
                               >
-                                <MessageSquare size={18} className="text-muted-foreground group-hover:text-primary" />
-                                <span className="text-sm font-medium flex-1">Messages</span>
+                                <MessageSquare
+                                  size={18}
+                                  className="text-muted-foreground group-hover:text-primary"
+                                />
+                                <span className="text-sm font-medium flex-1">
+                                  Messages
+                                </span>
                                 {unreadCount > 0 && (
                                   <motion.span
                                     initial={{ scale: 0 }}
@@ -484,7 +534,9 @@ export function NavBar() {
                                 onClick={closeMenu}
                               >
                                 <Shield size={18} className="text-accent" />
-                                <span className="text-sm font-semibold">Admin Panel</span>
+                                <span className="text-sm font-semibold">
+                                  Admin Panel
+                                </span>
                               </Link>
                             </motion.div>
                           </motion.div>
@@ -512,8 +564,13 @@ export function NavBar() {
                               className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-secondary/50 transition-colors duration-150 text-foreground hover:text-primary group"
                               onClick={closeMenu}
                             >
-                              <Lock size={18} className="text-muted-foreground group-hover:text-primary" />
-                              <span className="text-sm font-medium">Sign In</span>
+                              <Lock
+                                size={18}
+                                className="text-muted-foreground group-hover:text-primary"
+                              />
+                              <span className="text-sm font-medium">
+                                Sign In
+                              </span>
                             </Link>
                           </motion.div>
                           <motion.div
@@ -528,7 +585,9 @@ export function NavBar() {
                               onClick={closeMenu}
                             >
                               <Plus size={18} className="text-primary" />
-                              <span className="text-sm font-semibold">Create Account</span>
+                              <span className="text-sm font-semibold">
+                                Create Account
+                              </span>
                             </Link>
                           </motion.div>
                         </div>

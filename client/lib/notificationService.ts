@@ -42,7 +42,10 @@ export async function createNotification(
       notificationData.data = data;
     }
 
-    const docRef = await addDoc(collection(db, NOTIFICATIONS_COLLECTION), notificationData);
+    const docRef = await addDoc(
+      collection(db, NOTIFICATIONS_COLLECTION),
+      notificationData,
+    );
 
     return docRef.id;
   } catch (error) {

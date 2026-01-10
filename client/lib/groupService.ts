@@ -382,7 +382,10 @@ export async function sendGroupInvite(
       inviteData.message = message;
     }
 
-    const docRef = await addDoc(collection(db, GROUP_INVITES_COLLECTION), inviteData);
+    const docRef = await addDoc(
+      collection(db, GROUP_INVITES_COLLECTION),
+      inviteData,
+    );
 
     return docRef.id;
   } catch (error) {
