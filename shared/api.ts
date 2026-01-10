@@ -72,7 +72,13 @@ export interface GroupInvite {
 export interface Notification {
   id: string;
   userId: string;
-  type: "role_change" | "ban" | "group_invite" | "group_joined" | "group_message" | "asset_deleted";
+  type:
+    | "role_change"
+    | "ban"
+    | "group_invite"
+    | "group_joined"
+    | "group_message"
+    | "asset_deleted";
   title: string;
   message: string;
   data?: Record<string, any>;
@@ -84,7 +90,14 @@ export interface Notification {
  * Real-time Update Types
  */
 export interface RealtimeUpdate {
-  type: "user_banned" | "role_changed" | "group_created" | "group_updated" | "message_sent" | "member_joined" | "notification";
+  type:
+    | "user_banned"
+    | "role_changed"
+    | "group_created"
+    | "group_updated"
+    | "message_sent"
+    | "member_joined"
+    | "notification";
   userId: string;
   timestamp: Date;
   data: Record<string, any>;

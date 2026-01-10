@@ -59,7 +59,11 @@ export default function GroupDetail() {
       <div className="border-b border-border/20 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4 mb-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/groups")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/groups")}
+            >
               <ArrowLeft size={16} className="mr-2" />
               Back
             </Button>
@@ -69,7 +73,8 @@ export default function GroupDetail() {
             <h1 className="text-3xl font-bold text-foreground">{group.name}</h1>
             <p className="text-muted-foreground mt-2">{group.description}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              {group.memberCount} {group.memberCount === 1 ? "member" : "members"}
+              {group.memberCount}{" "}
+              {group.memberCount === 1 ? "member" : "members"}
             </p>
           </div>
         </div>

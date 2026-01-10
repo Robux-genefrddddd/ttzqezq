@@ -62,7 +62,10 @@ export default function Messages() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {displayedInvites.length === 0 ? (
           <div className="text-center py-12">
-            <Mail size={48} className="text-muted-foreground mx-auto mb-4 opacity-50" />
+            <Mail
+              size={48}
+              className="text-muted-foreground mx-auto mb-4 opacity-50"
+            />
             <h2 className="text-xl font-semibold text-foreground mb-2">
               No messages yet
             </h2>

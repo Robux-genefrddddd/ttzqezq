@@ -228,7 +228,9 @@ export default function AssetDetail() {
       }, 1500);
     } catch (error) {
       console.error("Error deleting asset:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete asset");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete asset",
+      );
     } finally {
       setDeletingAsset(false);
     }

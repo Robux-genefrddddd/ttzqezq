@@ -18,10 +18,13 @@ export function useFavorites(userId: string | undefined) {
     }
 
     setLoading(true);
-    const unsubscribe = assetService.subscribeToUserFavorites(userId, (favorites) => {
-      setFavorites(favorites);
-      setLoading(false);
-    });
+    const unsubscribe = assetService.subscribeToUserFavorites(
+      userId,
+      (favorites) => {
+        setFavorites(favorites);
+        setLoading(false);
+      },
+    );
 
     return unsubscribe;
   }, [userId]);
@@ -57,7 +60,8 @@ export function useAddToFavorites() {
       );
       return favoriteId;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error adding to favorites";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error adding to favorites";
       setError(errorMessage);
       throw err;
     } finally {
@@ -81,7 +85,8 @@ export function useRemoveFromFavorites() {
       setError(null);
       await assetService.removeFromFavorites(userId, assetId);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error removing from favorites";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error removing from favorites";
       setError(errorMessage);
       throw err;
     } finally {
@@ -95,7 +100,10 @@ export function useRemoveFromFavorites() {
 /**
  * Hook to check if asset is favorited
  */
-export function useIsFavorited(userId: string | undefined, assetId: string | undefined) {
+export function useIsFavorited(
+  userId: string | undefined,
+  assetId: string | undefined,
+) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(true);
 

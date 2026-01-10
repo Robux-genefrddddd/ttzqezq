@@ -56,9 +56,7 @@ export default function Groups() {
             </p>
             {canCreateGroup && (
               <CreateGroupDialog
-                onGroupCreated={(groupId) =>
-                  navigate(`/groups/${groupId}`)
-                }
+                onGroupCreated={(groupId) => navigate(`/groups/${groupId}`)}
               />
             )}
           </div>

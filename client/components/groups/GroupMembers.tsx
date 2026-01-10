@@ -108,7 +108,10 @@ export default function GroupMembers({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={sendingInvite || !inviteeEmail.trim()}>
+                  <Button
+                    type="submit"
+                    disabled={sendingInvite || !inviteeEmail.trim()}
+                  >
                     {sendingInvite && (
                       <Loader size={16} className="mr-2 animate-spin" />
                     )}

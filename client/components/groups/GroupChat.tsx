@@ -130,7 +130,10 @@ export default function GroupChat({ groupId }: GroupChatProps) {
               {/* Avatar */}
               <div className="flex-shrink-0">
                 <img
-                  src={message.senderAvatar || "https://tr.rbxcdn.com/180DAY-bd2c1a5fc86fd014cbbbaaafdd777643/420/420/Hat/Webp/noFilter"}
+                  src={
+                    message.senderAvatar ||
+                    "https://tr.rbxcdn.com/180DAY-bd2c1a5fc86fd014cbbbaaafdd777643/420/420/Hat/Webp/noFilter"
+                  }
                   alt={message.senderName}
                   className="w-8 h-8 rounded-full"
                 />

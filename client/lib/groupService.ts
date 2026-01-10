@@ -30,7 +30,10 @@ export async function createGroup(
   creatorId: string,
   creatorName: string,
   creatorAvatar: string | undefined,
-  groupData: Omit<Group, "id" | "createdAt" | "updatedAt" | "members" | "memberCount" | "isActive">,
+  groupData: Omit<
+    Group,
+    "id" | "createdAt" | "updatedAt" | "members" | "memberCount" | "isActive"
+  >,
 ): Promise<string> {
   try {
     const docRef = await addDoc(collection(db, GROUPS_COLLECTION), {
@@ -75,10 +78,11 @@ export async function getGroup(groupId: string): Promise<Group | null> {
         ...docSnap.data(),
         createdAt: docSnap.data().createdAt?.toDate?.() || new Date(),
         updatedAt: docSnap.data().updatedAt?.toDate?.() || new Date(),
-        members: docSnap.data().members?.map((m: any) => ({
-          ...m,
-          joinedAt: m.joinedAt?.toDate?.() || new Date(),
-        })) || [],
+        members:
+          docSnap.data().members?.map((m: any) => ({
+            ...m,
+            joinedAt: m.joinedAt?.toDate?.() || new Date(),
+          })) || [],
       } as Group;
     }
     return null;
@@ -107,15 +111,14 @@ export async function getUserGroups(userId: string): Promise<Group[]> {
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate?.() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-      members: doc.data().members?.map((m: any) => ({
-        ...m,
-        joinedAt: m.joinedAt?.toDate?.() || new Date(),
-      })) || [],
+      members:
+        doc.data().members?.map((m: any) => ({
+          ...m,
+          joinedAt: m.joinedAt?.toDate?.() || new Date(),
+        })) || [],
     })) as Group[];
 
-    return groups.sort(
-      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
-    );
+    return groups.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   } catch (error) {
     console.error("Error fetching user groups:", error);
     return [];
@@ -138,15 +141,14 @@ export async function getUserCreatedGroups(userId: string): Promise<Group[]> {
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate?.() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-      members: doc.data().members?.map((m: any) => ({
-        ...m,
-        joinedAt: m.joinedAt?.toDate?.() || new Date(),
-      })) || [],
+      members:
+        doc.data().members?.map((m: any) => ({
+          ...m,
+          joinedAt: m.joinedAt?.toDate?.() || new Date(),
+        })) || [],
     })) as Group[];
 
-    return groups.sort(
-      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
-    );
+    return groups.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   } catch (error) {
     console.error("Error fetching user created groups:", error);
     return [];
@@ -470,10 +472,11 @@ export function subscribeToGroup(
           ...snapshot.data(),
           createdAt: snapshot.data().createdAt?.toDate?.() || new Date(),
           updatedAt: snapshot.data().updatedAt?.toDate?.() || new Date(),
-          members: snapshot.data().members?.map((m: any) => ({
-            ...m,
-            joinedAt: m.joinedAt?.toDate?.() || new Date(),
-          })) || [],
+          members:
+            snapshot.data().members?.map((m: any) => ({
+              ...m,
+              joinedAt: m.joinedAt?.toDate?.() || new Date(),
+            })) || [],
         } as Group;
 
         onGroupUpdate(group);
@@ -504,13 +507,14 @@ export function subscribeToUserGroups(
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate?.() || new Date(),
           updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-          members: doc.data().members?.map((m: any) => ({
-            ...m,
-            joinedAt: m.joinedAt?.toDate?.() || new Date(),
-          })) || [],
+          members:
+            doc.data().members?.map((m: any) => ({
+              ...m,
+              joinedAt: m.joinedAt?.toDate?.() || new Date(),
+            })) || [],
         }))
-        .filter(
-          (g) => g.members.some((m) => m.userId === userId && m.isActive),
+        .filter((g) =>
+          g.members.some((m) => m.userId === userId && m.isActive),
         ) as Group[];
 
       onGroupsUpdate(groups);

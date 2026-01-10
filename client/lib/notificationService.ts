@@ -152,7 +152,9 @@ export function subscribeToUserNotifications(
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate?.() || new Date(),
         }))
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as Notification[];
+        .sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+        ) as Notification[];
 
       onNotificationsUpdate(notifications);
     });
@@ -211,10 +213,7 @@ export async function notifyRoleChange(
 /**
  * Create system notification for ban
  */
-export async function notifyBan(
-  userId: string,
-  reason: string,
-): Promise<void> {
+export async function notifyBan(userId: string, reason: string): Promise<void> {
   try {
     await createNotification(
       userId,

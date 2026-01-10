@@ -162,7 +162,10 @@ export function NavBar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/messages" className="cursor-pointer flex items-center justify-between">
+                      <Link
+                        to="/messages"
+                        className="cursor-pointer flex items-center justify-between"
+                      >
                         <div className="flex items-center">
                           <Mail size={16} className="mr-2" />
                           Messages

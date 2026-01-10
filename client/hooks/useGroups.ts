@@ -72,10 +72,13 @@ export function useGroupMessages(groupId: string | undefined) {
     }
 
     setLoading(true);
-    const unsubscribe = groupService.subscribeToGroupMessages(groupId, (messages) => {
-      setMessages(messages);
-      setLoading(false);
-    });
+    const unsubscribe = groupService.subscribeToGroupMessages(
+      groupId,
+      (messages) => {
+        setMessages(messages);
+        setLoading(false);
+      },
+    );
 
     return unsubscribe;
   }, [groupId]);
@@ -145,7 +148,8 @@ export function useSendMessage() {
       );
       return messageId;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error sending message";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error sending message";
       setError(errorMessage);
       throw err;
     } finally {
@@ -181,7 +185,8 @@ export function useCreateGroup() {
       );
       return groupId;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error creating group";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error creating group";
       setError(errorMessage);
       throw err;
     } finally {
@@ -217,7 +222,8 @@ export function useAcceptGroupInvite() {
         avatar,
       );
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error accepting invite";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error accepting invite";
       setError(errorMessage);
       throw err;
     } finally {
@@ -258,7 +264,8 @@ export function useSendGroupInvite() {
       );
       return inviteId;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error sending invite";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error sending invite";
       setError(errorMessage);
       throw err;
     } finally {

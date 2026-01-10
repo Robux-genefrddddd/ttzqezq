@@ -384,7 +384,10 @@ export async function getUserFavorites(userId: string): Promise<Favorite[]> {
 }
 
 // Check if asset is favorited
-export async function isFavorited(userId: string, assetId: string): Promise<boolean> {
+export async function isFavorited(
+  userId: string,
+  assetId: string,
+): Promise<boolean> {
   try {
     const q = query(
       collection(db, FAVORITES_COLLECTION),

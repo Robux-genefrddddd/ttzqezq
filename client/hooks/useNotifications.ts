@@ -74,7 +74,8 @@ export function useMarkNotificationAsRead() {
       setError(null);
       await notificationService.markNotificationAsRead(notificationId);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error marking as read";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error marking as read";
       setError(errorMessage);
       throw err;
     } finally {
@@ -98,7 +99,8 @@ export function useDeleteNotification() {
       setError(null);
       await notificationService.deleteNotification(notificationId);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error deleting notification";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error deleting notification";
       setError(errorMessage);
       throw err;
     } finally {
