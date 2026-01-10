@@ -99,8 +99,13 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
@@ -108,9 +113,44 @@
     word-break: break-word;
   }
 
+  h1 {
+    @apply text-4xl font-bold tracking-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  h4 {
+    @apply text-xl font-semibold;
+  }
+
   pre,
   code {
     overflow-x: auto;
     white-space: pre;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/80 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg dark:hover:shadow-lg/20 hover:scale-105;
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg transition-all duration-200 hover:opacity-90 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border transition-all duration-200 hover:bg-muted active:scale-95;
   }
 }
