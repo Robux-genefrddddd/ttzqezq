@@ -178,12 +178,10 @@ export async function addMessageToTicket(
 ): Promise<void> {
   try {
     const ticketRef = doc(db, TICKETS_COLLECTION, ticketId);
-    const ticketDoc = await getDocs(
-      query(collection(db, TICKETS_COLLECTION), where("__name__", "==", ticketId)),
-    );
+    const ticketDoc = await getDoc(ticketRef);
 
-    if (ticketDoc.docs.length > 0) {
-      const currentMessages = ticketDoc.docs[0].data().messages || [];
+    if (ticketDoc.exists()) {
+      const currentMessages = ticketDoc.data().messages || [];
       const newMessage: TicketMessage = {
         id: Math.random().toString(36),
         senderId,
