@@ -88,8 +88,22 @@ export async function loginUser(
       password,
     );
     return userCredential.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
+
+    // Provide better error messages
+    if (error.code === "auth/invalid-credential") {
+      throw new Error("Invalid email or password. Please check your credentials and try again.");
+    } else if (error.code === "auth/user-not-found") {
+      throw new Error("No account found with this email. Please create an account first.");
+    } else if (error.code === "auth/wrong-password") {
+      throw new Error("Incorrect password. Please try again.");
+    } else if (error.code === "auth/invalid-email") {
+      throw new Error("Invalid email address.");
+    } else if (error.code === "auth/too-many-requests") {
+      throw new Error("Too many failed login attempts. Please try again later.");
+    }
+
     throw error;
   }
 }
