@@ -182,14 +182,17 @@ export function subscribeToUserWarnings(
 // Check if user is banned
 export async function isUserBanned(userId: string): Promise<boolean> {
   try {
+    // Only filter by userId, then filter other conditions client-side
     const q = query(
       collection(db, WARNINGS_COLLECTION),
       where("userId", "==", userId),
-      where("type", "==", "ban"),
-      where("isActive", "==", true),
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.length > 0;
+    const hasBan = querySnapshot.docs.some(
+      (doc) =>
+        doc.data().type === "ban" && doc.data().isActive === true,
+    );
+    return hasBan;
   } catch (error) {
     console.error("Error checking ban status:", error);
     return false;
