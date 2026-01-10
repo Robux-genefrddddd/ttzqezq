@@ -248,7 +248,7 @@ export function NavBar() {
               About
             </Link>
 
-            {isAuthenticated && userProfile && !loading ? (
+            {isAuthenticated && userProfile ? (
               <>
                 <div className="px-4 py-3 border-t border-border/20 mt-2">
                   <div className="flex items-center gap-2 mb-3">
@@ -303,22 +303,20 @@ export function NavBar() {
                 </button>
               </>
             ) : (
-              !loading && (
-                <>
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 hover:bg-secondary/40 transition-colors font-medium text-sm"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-4 py-2 bg-primary text-primary-foreground font-medium text-sm rounded-xl hover:opacity-90 transition-all"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )
+              <>
+                <Link
+                  to="/login"
+                  className="block px-4 py-2 hover:bg-secondary/40 transition-colors font-medium text-sm"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="block px-4 py-2 bg-primary text-primary-foreground font-medium text-sm rounded-xl hover:opacity-90 transition-all"
+                >
+                  Sign Up
+                </Link>
+              </>
             )}
           </div>
         )}
