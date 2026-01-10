@@ -298,7 +298,7 @@ export default function GroupChat({ groupId }: GroupChatProps) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={sendingMessage || uploading}
-              className="p-1.5 hover:bg-secondary/50 rounded transition-colors flex-shrink-0 h-8 w-8 flex items-center justify-center"
+              className="p-1.5 hover:bg-secondary/50 rounded flex-shrink-0 h-8 w-8 flex items-center justify-center"
               title="Attach image"
             >
               <ImageIcon size={16} className="text-muted-foreground" />
