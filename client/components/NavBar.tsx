@@ -262,21 +262,18 @@ export function NavBar() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -300, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="fixed left-0 top-0 bottom-0 w-72 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border-r border-blue-500/20 overflow-y-auto z-[9999] shadow-2xl"
+                className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border/30 overflow-y-auto z-[9999] shadow-lg"
               >
                 <div className="flex flex-col h-full">
                   <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, duration: 0.3 }}
-                    className="px-6 py-6 border-b border-blue-500/10 bg-gradient-to-r from-blue-500/5 to-transparent"
+                    className="px-6 py-6 border-b border-border/20 bg-background/50"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">🎮</span>
-                      <h2 className="text-xl font-bold text-white">Menu</h2>
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      Quick access to features
+                    <h2 className="text-lg font-bold text-foreground">Navigation</h2>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Browse & manage
                     </p>
                   </motion.div>
 
