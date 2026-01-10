@@ -365,7 +365,9 @@ export default function Upload() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground/70">Price</p>
+                        <p className="text-xs text-muted-foreground/70">
+                          Price
+                        </p>
                         <p className="text-xs font-medium text-foreground">
                           ${formData.price || "0.00"}
                         </p>

@@ -25,10 +25,13 @@ export function UploadStep3({
       {/* Price */}
       <div className="space-y-1.5">
         <label className="block text-xs font-medium text-foreground">
-          Price (USD) <span className="text-muted-foreground/70 text-xs">(Optional)</span>
+          Price (USD){" "}
+          <span className="text-muted-foreground/70 text-xs">(Optional)</span>
         </label>
         <div className="relative">
-          <span className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground/50 text-xs">$</span>
+          <span className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground/50 text-xs">
+            $
+          </span>
           <input
             type="number"
             value={price}
@@ -47,7 +50,8 @@ export function UploadStep3({
       {/* Tags */}
       <div className="space-y-1.5">
         <label className="block text-xs font-medium text-foreground">
-          Tags <span className="text-muted-foreground/70 text-xs">(Optional)</span>
+          Tags{" "}
+          <span className="text-muted-foreground/70 text-xs">(Optional)</span>
         </label>
         <textarea
           value={tags}

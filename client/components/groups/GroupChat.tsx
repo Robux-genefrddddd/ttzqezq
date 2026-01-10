@@ -3,7 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGroupMessages, useSendMessage } from "@/hooks/useGroups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader, Send, Image as ImageIcon, X, MessageCircle } from "lucide-react";
+import {
+  Loader,
+  Send,
+  Image as ImageIcon,
+  X,
+  MessageCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Message } from "@shared/api";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
@@ -36,9 +42,10 @@ export default function GroupChat({ groupId }: GroupChatProps) {
   const handleScroll = useCallback(() => {
     if (!messagesContainerRef.current) return;
 
-    const { scrollHeight, scrollTop, clientHeight } = messagesContainerRef.current;
+    const { scrollHeight, scrollTop, clientHeight } =
+      messagesContainerRef.current;
     const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-    
+
     setIsNearBottom(distanceFromBottom < SCROLL_THRESHOLD);
   }, []);
 
@@ -161,10 +168,7 @@ export default function GroupChat({ groupId }: GroupChatProps) {
           <div className="flex items-center justify-center flex-1 min-h-40">
             <div className="text-center">
               <div className="flex justify-center mb-2">
-                <MessageCircle 
-                  size={32} 
-                  className="text-muted-foreground/30" 
-                />
+                <MessageCircle size={32} className="text-muted-foreground/30" />
               </div>
               <p className="text-sm font-medium text-muted-foreground mb-0.5">
                 No messages yet

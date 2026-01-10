@@ -126,7 +126,9 @@ export function UploadStep1({
                 alt="Banner preview"
                 className="w-full h-32 object-cover rounded-lg"
               />
-              <p className="text-xs text-muted-foreground/60">Click to change</p>
+              <p className="text-xs text-muted-foreground/60">
+                Click to change
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
