@@ -1,9 +1,10 @@
 /**
  * Cloud Functions for asset upload handling
- * - NSFW detection with OpenRouter API
+ * - NSFW detection with OpenRouter API (image analysis)
+ * - NSFW text detection with JigsawStack API (content analysis)
  * - Automatic warning system with auto-ban after 3 warnings
  * - Audit logging for all uploads
- * 
+ *
  * Deploy with: firebase deploy --only functions:onAssetCreated,functions:scanImageForNSFW
  */
 
@@ -14,6 +15,7 @@ import { logAuditAction } from './audit';
 const db = admin.firestore();
 const storage = admin.storage();
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const JIGSAWSTACK_API_KEY = process.env.JIGSAWSTACK_API_KEY;
 
 /**
  * Triggered when an asset is uploaded with status 'uploading'
