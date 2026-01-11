@@ -304,6 +304,105 @@ Be STRICT. This is a marketplace for family-friendly content.`,
 }
 
 /**
+ * Check text content for NSFW/inappropriate material using JigsawStack Sentiment API
+ * Analyzes: asset name, description, and tags
+ *
+ * Returns true if content is inappropriate
+ */
+async function checkTextForNSFW(
+  text: string,
+  fieldName: string
+): Promise<{
+  isNSFW: boolean;
+  reason: string;
+  emotion: string;
+  sentiment: string;
+}> {
+  if (!JIGSAWSTACK_API_KEY) {
+    console.warn('⚠️ JIGSAWSTACK_API_KEY not configured - skipping text NSFW check');
+    return { isNSFW: false, reason: 'Text check skipped', emotion: '', sentiment: '' };
+  }
+
+  if (!text || text.trim().length === 0) {
+    return { isNSFW: false, reason: 'Empty text', emotion: '', sentiment: '' };
+  }
+
+  try {
+    console.log(`📝 Checking "${fieldName}": "${text.substring(0, 50)}..."`);
+
+    const response = await fetch('https://api.jigsawstack.com/v1/ai/sentiment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': JIGSAWSTACK_API_KEY,
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error(`JigsawStack API error (${response.status}):`, errorData);
+      // Non-critical: continue with image check if text check fails
+      return { isNSFW: false, reason: 'Text check API error', emotion: '', sentiment: '' };
+    }
+
+    const data = (await response.json()) as any;
+
+    if (!data.sentiment) {
+      console.warn('No sentiment data in JigsawStack response');
+      return { isNSFW: false, reason: 'No sentiment data', emotion: '', sentiment: '' };
+    }
+
+    const emotion = data.sentiment.emotion || '';
+    const sentiment = data.sentiment.sentiment || '';
+    const score = data.sentiment.score || 0;
+
+    console.log(`   Emotion: ${emotion}, Sentiment: ${sentiment}, Score: ${score}`);
+
+    // Detect inappropriate content based on emotion/sentiment
+    const nsfwEmotions = [
+      'anger',
+      'hatred',
+      'disgust',
+      'obscenity',
+      'explicit',
+      'sexual',
+      'profanity',
+      'slur',
+      'abuse',
+      'harassment',
+    ];
+
+    const isEmotionNSFW = nsfwEmotions.some(
+      (e) =>
+        emotion.toLowerCase().includes(e) ||
+        emotion.toLowerCase() === e
+    );
+
+    // Also check for text patterns that often indicate NSFW
+    const nsfwPatterns = /sex|porn|xxx|nude|dick|pussy|cock|ass|shit|fuck|damn|cunt|whore|slut|rape|incest/gi;
+    const textHasNSFWPattern = nsfwPatterns.test(text);
+
+    const finalIsNSFW = isEmotionNSFW || textHasNSFWPattern;
+
+    if (finalIsNSFW) {
+      console.warn(`   ⛔ NSFW TEXT DETECTED in ${fieldName}`);
+    }
+
+    return {
+      isNSFW: finalIsNSFW,
+      reason: finalIsNSFW ? `${fieldName}: Inappropriate content` : `${fieldName}: Safe`,
+      emotion,
+      sentiment,
+    };
+  } catch (error) {
+    console.error(`Text NSFW check error for "${fieldName}":`, error);
+    // Non-critical: continue if text check fails
+    return { isNSFW: false, reason: 'Text check failed', emotion: '', sentiment: '' };
+  }
+}
+
+/**
  * Create warning on user account
  * Auto-ban after 3 warnings for the same reason
  */
