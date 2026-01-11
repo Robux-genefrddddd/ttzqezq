@@ -63,8 +63,58 @@ export const onAssetUploaded = functions.firestore
         return;
       }
 
-      // Call NSFW detection API
-      console.log(`📤 Calling OpenRouter API for NSFW detection...`);
+      // ===== CHECK TEXT CONTENT FOR NSFW (name, description, tags) =====
+      console.log(`📝 Checking text content for NSFW...`);
+
+      const textChecks = await Promise.all([
+        checkTextForNSFW(asset.name || '', 'Asset Name'),
+        checkTextForNSFW(asset.description || '', 'Description'),
+        checkTextForNSFW((asset.tags || []).join(' '), 'Tags'),
+      ]);
+
+      const hasNSFWText = textChecks.some((check) => check.isNSFW);
+      const nsfwTextReasons = textChecks
+        .filter((check) => check.isNSFW)
+        .map((check) => check.reason);
+
+      if (hasNSFWText) {
+        console.warn(`⛔ NSFW TEXT DETECTED - Rejecting upload`);
+        await snap.ref.update({
+          status: 'rejected',
+          rejectionReason: `Content violates community guidelines (${nsfwTextReasons.join('; ')})`,
+          rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // Create warning
+        try {
+          await createWarning(
+            asset.authorId,
+            'upload_abuse',
+            `Your upload "${asset.name}" was rejected for containing inappropriate text content. ${nsfwTextReasons.join('; ')}`,
+            asset.imageUrl
+          );
+        } catch (warningError) {
+          console.error(`Failed to create warning:`, warningError);
+        }
+
+        // Log audit
+        try {
+          await logAuditAction(
+            asset.authorId,
+            'UPLOAD_REJECTED_NSFW_TEXT',
+            assetId,
+            true,
+            { reasons: nsfwTextReasons, assetName: asset.name }
+          );
+        } catch (auditError) {
+          console.error(`Failed to log audit:`, auditError);
+        }
+
+        return;
+      }
+
+      // ===== CHECK IMAGE CONTENT FOR NSFW =====
+      console.log(`📤 Calling OpenRouter API for image NSFW detection...`);
       const nsfwResult = await checkImageForNSFW(asset.imageUrl);
 
       console.log(`📊 NSFW Detection Result:`);
