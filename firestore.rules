@@ -1,0 +1,280 @@
+rules_version = '2';
+service cloud.firestore {
+  // ========== HELPER FUNCTIONS ==========
+  function isAuthenticated() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+  function hasRole(role) {
+    return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+  }
+
+  function isAdmin() {
+    return hasRole('admin') || hasRole('founder');
+  }
+
+  function isModerator() {
+    return hasRole('admin') || hasRole('founder') || hasRole('support');
+  }
+
+  function userHasMinRank(rank) {
+    let ranks = ['starter', 'creator', 'pro', 'studio'];
+    let userRankIndex = ranks.indexOf(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.memberRank);
+    let requiredIndex = ranks.indexOf(rank);
+    return userRankIndex >= requiredIndex;
+  }
+
+  match /databases/{database}/documents {
+
+    // ========== USERS COLLECTION ==========
+    match /users/{userId} {
+      // Only the user can read their own profile
+      allow read: if isOwner(userId);
+      
+      // Admins can read any user (for moderation)
+      allow read: if isAdmin();
+
+      // Users can create their own profile during signup (via Cloud Function)
+      allow create: if isOwner(userId) && isAuthenticated();
+
+      // Users can update ONLY safe, non-privileged fields on their own profile
+      // FORBIDDEN: role, memberRank, isBanned, banReason, earnings, assetsCreated, assetsDownloaded
+      allow update: if isOwner(userId) && 
+        !('role' in request.resource.data) &&
+        !('memberRank' in request.resource.data) &&
+        !('isBanned' in request.resource.data) &&
+        !('banReason' in request.resource.data) &&
+        !('banDate' in request.resource.data) &&
+        !('banUntilDate' in request.resource.data) &&
+        !('earnings' in request.resource.data) &&
+        !('assetsCreated' in request.resource.data) &&
+        !('assetsDownloaded' in request.resource.data) &&
+        !('uid' in request.resource.data) &&
+        !('email' in request.resource.data) &&
+        !('createdAt' in request.resource.data);
+
+      // Admins can update any field (for moderation)
+      allow update: if isAdmin();
+
+      // Prevent deletion
+      allow delete: if false;
+    }
+
+    // ========== ASSETS COLLECTION ==========
+    match /assets/{assetId} {
+      // Anyone can read published assets
+      allow read: if resource.data.status == 'published';
+
+      // Authors can read their own draft/uploading/verification assets
+      allow read: if isOwner(resource.data.authorId);
+
+      // Admins can read all assets
+      allow read: if isAdmin();
+
+      // Authenticated users can create with authorId = request.auth.uid
+      allow create: if isAuthenticated() &&
+        request.resource.data.authorId == request.auth.uid &&
+        request.resource.data.status == 'uploading' &&
+        request.resource.data.rating == 0 &&
+        request.resource.data.downloads == 0 &&
+        request.resource.data.reviews == 0 &&
+        request.resource.data.featured == false;
+
+      // Authors can update their own draft/uploading/verification assets
+      // But CANNOT change: authorId, downloads, reviews, rating, featured, status
+      allow update: if isOwner(resource.data.authorId) &&
+        resource.data.status in ['draft', 'uploading', 'verification'] &&
+        !('authorId' in request.resource.data) &&
+        !('downloads' in request.resource.data) &&
+        !('reviews' in request.resource.data) &&
+        !('rating' in request.resource.data) &&
+        !('featured' in request.resource.data) &&
+        !('status' in request.resource.data);
+
+      // Admins can update any field (for publishing/rejection)
+      allow update: if isAdmin();
+
+      // Only authors can delete their own drafts
+      allow delete: if isOwner(resource.data.authorId) &&
+        resource.data.status in ['draft', 'uploading'];
+
+      // Admins can delete published assets
+      allow delete: if isAdmin();
+    }
+
+    // ========== REVIEWS COLLECTION ==========
+    match /reviews/{reviewId} {
+      // Anyone can read published reviews
+      allow read: if resource.data.published == true;
+
+      // Authors can read their own reviews (unpublished too)
+      allow read: if isOwner(resource.data.authorId);
+
+      // Authenticated users can create reviews (only their own)
+      allow create: if isAuthenticated() &&
+        request.resource.data.authorId == request.auth.uid &&
+        request.resource.data.published == false;
+
+      // Authors can update their own unpublished reviews
+      allow update: if isOwner(resource.data.authorId) &&
+        resource.data.published == false &&
+        !('published' in request.resource.data) &&
+        !('authorId' in request.resource.data);
+
+      // Only authors can delete their own reviews
+      allow delete: if isOwner(resource.data.authorId);
+    }
+
+    // ========== GROUPS COLLECTION ==========
+    match /groups/{groupId} {
+      // Members can read their groups
+      allow read: if request.auth.uid in resource.data.memberIds;
+
+      // Authenticated users can create groups
+      allow create: if isAuthenticated() &&
+        request.resource.data.creatorId == request.auth.uid;
+
+      // Only creator can update base group info
+      allow update: if isOwner(resource.data.creatorId) &&
+        !('creatorId' in request.resource.data) &&
+        !('members' in request.resource.data) &&
+        !('memberIds' in request.resource.data);
+
+      // Only creator can delete
+      allow delete: if isOwner(resource.data.creatorId);
+
+      // ===== GROUP MESSAGES =====
+      match /messages/{messageId} {
+        // Members of parent group can read messages
+        allow read: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+
+        // Members can create messages (senderId must equal request.auth.uid)
+        allow create: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds &&
+          request.resource.data.senderId == request.auth.uid;
+
+        // Authors can edit their own messages
+        allow update: if isOwner(resource.data.senderId) &&
+          !('senderId' in request.resource.data) &&
+          !('timestamp' in request.resource.data) &&
+          !('groupId' in request.resource.data);
+
+        // Authors can delete their own messages
+        allow delete: if isOwner(resource.data.senderId);
+      }
+    }
+
+    // ========== FAVORITES COLLECTION ==========
+    match /favorites/{favId} {
+      // Users can read their own favorites
+      allow read: if isOwner(resource.data.userId);
+
+      // Users can create their own favorites
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+
+      // Users can delete their own favorites
+      allow delete: if isOwner(resource.data.userId);
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // ========== NOTIFICATIONS COLLECTION ==========
+    match /notifications/{notifId} {
+      // Users can read their own notifications
+      allow read: if isOwner(resource.data.userId);
+
+      // Cloud Functions only
+      allow create: if false;
+
+      // Users can mark read only
+      allow update: if isOwner(resource.data.userId) &&
+        !('type' in request.resource.data) &&
+        !('title' in request.resource.data) &&
+        !('message' in request.resource.data) &&
+        !('data' in request.resource.data);
+
+      // Users can delete their own notifications
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // ========== AUDIT LOG COLLECTION (APPEND-ONLY) ==========
+    match /audit_logs/{logId} {
+      // Only admins can read audit logs
+      allow read: if isAdmin();
+
+      // Cloud Functions only
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ========== WARNINGS COLLECTION ==========
+    match /warnings/{warningId} {
+      // Users can read their own warnings
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+
+      // Cloud Functions only
+      allow create: if false;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ========== TICKETS COLLECTION (SUPPORT) ==========
+    match /tickets/{ticketId} {
+      // Ticket creator can read their own tickets
+      allow read: if isOwner(resource.data.userId);
+
+      // Support staff can read all tickets
+      allow read: if isModerator();
+
+      // Authenticated users can create tickets
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+
+      // Ticket creator can update their own ticket
+      allow update: if isOwner(resource.data.userId) &&
+        !('status' in request.resource.data) &&
+        !('priority' in request.resource.data) &&
+        !('assignedTo' in request.resource.data);
+
+      // Support can update
+      allow update: if isModerator();
+
+      // Only support can delete
+      allow delete: if isModerator();
+    }
+
+    // ========== SCHEDULED UPLOADS COLLECTION ==========
+    match /scheduled_uploads/{uploadId} {
+      // Users can read their own scheduled uploads
+      allow read: if isOwner(resource.data.userId);
+
+      // Admins can read all
+      allow read: if isAdmin();
+
+      // Users can create their own
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+
+      // Users can update their own pending uploads
+      allow update: if isOwner(resource.data.userId) &&
+        resource.data.status in ['pending', 'scheduled'];
+
+      // Admins can update
+      allow update: if isAdmin();
+
+      // Users can delete their own
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // ========== DEFAULT DENY ==========
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
