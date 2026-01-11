@@ -23,83 +23,141 @@ export const onAssetUploaded = functions.firestore
   .document('assets/{assetId}')
   .onCreate(async (snap, context) => {
     const asset = snap.data() as any;
+    const assetId = context.params.assetId;
 
-    // Only process uploaded assets
-    if (asset.status !== 'uploading') return;
+    // Only process uploaded assets with status 'uploading'
+    if (asset.status !== 'uploading') {
+      console.log(`⏭️  Skipping asset ${assetId}: status is ${asset.status}, not 'uploading'`);
+      return;
+    }
 
     try {
-      console.log(`🔍 Scanning asset ${context.params.assetId} for NSFW content...`);
+      console.log(`\n🔍 === NSFW SCAN STARTED for Asset: ${assetId} ===`);
+      console.log(`   Author: ${asset.authorId}`);
+      console.log(`   Name: ${asset.name}`);
+      console.log(`   Image URL: ${asset.imageUrl ? asset.imageUrl.substring(0, 50) + '...' : 'MISSING'}`);
 
-      // Check if asset has an image
+      // Check if asset has an image URL
       if (!asset.imageUrl) {
-        console.warn(`Asset ${context.params.assetId} has no image URL`);
+        console.error(`❌ Asset ${assetId} has no imageUrl - rejecting`);
+        await snap.ref.update({
+          status: 'rejected',
+          rejectionReason: 'No image provided for verification',
+          rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
+        });
         return;
       }
 
-      // Scan for NSFW
+      // Validate image URL format
+      try {
+        new URL(asset.imageUrl);
+      } catch (e) {
+        console.error(`❌ Invalid image URL: ${asset.imageUrl}`);
+        await snap.ref.update({
+          status: 'rejected',
+          rejectionReason: 'Invalid image URL',
+          rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+
+      // Call NSFW detection API
+      console.log(`📤 Calling OpenRouter API for NSFW detection...`);
       const nsfwResult = await checkImageForNSFW(asset.imageUrl);
 
+      console.log(`📊 NSFW Detection Result:`);
+      console.log(`   Is NSFW: ${nsfwResult.isNSFW}`);
+      console.log(`   Confidence: ${(nsfwResult.confidence * 100).toFixed(1)}%`);
+      console.log(`   Reason: ${nsfwResult.reason}`);
+
       if (nsfwResult.isNSFW) {
-        // REJECT the upload
+        // ⛔ REJECT - Inappropriate content detected
         console.warn(
-          `⛔ Asset ${context.params.assetId} rejected: NSFW content detected`
+          `⛔⛔⛔ NSFW CONTENT DETECTED - Asset ${assetId} REJECTED ⛔⛔⛔`
         );
 
         await snap.ref.update({
           status: 'rejected',
-          rejectionReason: 'Content violates community guidelines (adult content)',
+          rejectionReason: `Content violates community guidelines (inappropriate content detected - ${nsfwResult.reason})`,
           rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
+          nsfwConfidence: nsfwResult.confidence,
+          nsfwReason: nsfwResult.reason,
         });
 
         // Create warning on user account
-        await createWarning(
-          asset.authorId,
-          'upload_abuse',
-          `Your upload "${asset.name}" was rejected for containing inappropriate content`,
-          asset.imageUrl
-        );
+        try {
+          await createWarning(
+            asset.authorId,
+            'upload_abuse',
+            `Your upload "${asset.name}" was rejected for containing inappropriate content. Confidence: ${(nsfwResult.confidence * 100).toFixed(1)}%. Reason: ${nsfwResult.reason}`,
+            asset.imageUrl
+          );
+        } catch (warningError) {
+          console.error(`Failed to create warning for user ${asset.authorId}:`, warningError);
+        }
 
-        // Log
-        await logAuditAction(
-          asset.authorId,
-          'UPLOAD_REJECTED_NSFW',
-          context.params.assetId,
-          true,
-          {
-            assetName: asset.name,
-            confidence: nsfwResult.confidence,
-            reason: nsfwResult.reason,
-          }
-        );
+        // Log audit action
+        try {
+          await logAuditAction(
+            asset.authorId,
+            'UPLOAD_REJECTED_NSFW',
+            assetId,
+            true,
+            {
+              assetName: asset.name,
+              confidence: nsfwResult.confidence,
+              reason: nsfwResult.reason,
+              detectionTime: new Date().toISOString(),
+            }
+          );
+        } catch (auditError) {
+          console.error(`Failed to log audit action:`, auditError);
+        }
 
         return;
       }
 
-      // SAFE - publish the asset
-      console.log(`✅ Asset ${context.params.assetId} passed NSFW scan`);
+      // ✅ SAFE - Publish the asset
+      console.log(`✅✅✅ ASSET PASSED NSFW CHECK - Asset ${assetId} PUBLISHED ✅✅✅\n`);
 
       await snap.ref.update({
         status: 'published',
         publishedDate: admin.firestore.FieldValue.serverTimestamp(),
+        nsfwChecked: true,
+        nsfwConfidence: nsfwResult.confidence,
       });
 
       // Log successful upload
-      await logAuditAction(
-        asset.authorId,
-        'ASSET_PUBLISHED',
-        context.params.assetId,
-        false,
-        { assetName: asset.name }
-      );
-    } catch (error) {
-      console.error(`❌ Error processing asset ${context.params.assetId}:`, error);
+      try {
+        await logAuditAction(
+          asset.authorId,
+          'ASSET_PUBLISHED',
+          assetId,
+          false,
+          {
+            assetName: asset.name,
+            nsfwConfidence: nsfwResult.confidence,
+          }
+        );
+      } catch (auditError) {
+        console.error(`Failed to log successful upload:`, auditError);
+      }
 
-      // Fail safe: reject the upload
-      await snap.ref.update({
-        status: 'rejected',
-        rejectionReason: 'Upload verification failed. Please try again.',
-        rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
-      });
+    } catch (error) {
+      console.error(`\n❌❌❌ ERROR processing asset ${assetId}:`, error);
+      console.error(`Error details: ${error instanceof Error ? error.message : String(error)}\n`);
+
+      // FAIL SAFE: Reject the upload if verification fails
+      try {
+        await snap.ref.update({
+          status: 'rejected',
+          rejectionReason: `Upload verification failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try uploading again.`,
+          rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
+          verificationError: error instanceof Error ? error.message : String(error),
+        });
+      } catch (updateError) {
+        console.error(`Failed to update asset status after error:`, updateError);
+      }
     }
   });
 
