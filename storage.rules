@@ -1,19 +1,63 @@
 rules_version = '2';
 service firebase.storage {
+  // Helper functions
+  function isImage() {
+    return request.resource.contentType.matches('image/(png|jpeg|webp)');
+  }
+
+  function isValidImageSize() {
+    return request.resource.size <= 5 * 1024 * 1024; // 5MB max
+  }
+
+  function isProfileImage() {
+    return request.resource.contentType.matches('image/(png|jpeg|webp)');
+  }
+
   match /b/{bucket}/o {
-    // Allow anyone to read assets (public download)
+    // ========== PUBLISHED ASSETS (PUBLIC READ) ==========
+    // Allow anyone to read published assets
     match /assets/{assetId}/{file=**} {
-      allow read;
-      // Only authenticated users can write/upload
-      allow write: if request.auth != null;
+      allow read: if true;
+
+      // Only authenticated users can write
+      // (validation happens in Firestore rules + Cloud Functions)
+      allow write: if request.auth != null &&
+        isImage() &&
+        isValidImageSize();
     }
 
-    // Allow authenticated users to write temporary files
+    // ========== TEMPORARY UPLOADS (USER-SPECIFIC) ==========
+    // Users can only write to their own temp folder
     match /temp/{userId}/{file=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow write: if request.auth != null &&
+        request.auth.uid == userId &&
+        isImage() &&
+        isValidImageSize();
     }
 
-    // Default: deny everything else
+    // ========== PROFILE IMAGES ==========
+    // Public read, user-specific write
+    match /profiles/{userId}/{file=**} {
+      allow read: if true;
+
+      allow write: if request.auth != null &&
+        request.auth.uid == userId &&
+        isProfileImage() &&
+        request.resource.size <= 2 * 1024 * 1024; // 2MB for profile pics
+    }
+
+    // ========== GROUP MESSAGE IMAGES ==========
+    match /groups/{groupId}/messages/{messageId}/{file=**} {
+      allow read: if request.auth != null;
+
+      allow write: if request.auth != null &&
+        isImage() &&
+        request.resource.size <= 3 * 1024 * 1024; // 3MB for messages
+    }
+
+    // ========== DEFAULT DENY ==========
     match /{allPaths=**} {
       allow read, write: if false;
     }
