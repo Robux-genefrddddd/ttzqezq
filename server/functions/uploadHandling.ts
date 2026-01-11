@@ -121,21 +121,27 @@ async function checkImageForNSFW(
   confidence: number;
   reason: string;
 }> {
-  if (!OPENROUTER_API_KEY) {
-    throw new Error('OPENROUTER_API_KEY not configured');
+  // Use environment variable or fallback to provided key
+  const apiKey = OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+
+  if (!apiKey) {
+    console.warn('⚠️ OPENROUTER_API_KEY not configured - FAILING SAFE (rejecting uploads)');
+    throw new Error('NSFW detection service unavailable - uploads temporarily disabled');
   }
 
   try {
+    console.log(`🔍 Scanning image for NSFW content: ${imageUrl.substring(0, 50)}...`);
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': 'https://marketplace.com',
-        'X-Title': 'Marketplace Asset Verification',
+        Authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://marketplace.example.com',
+        'X-Title': 'Marketplace NSFW Detection System',
       },
       body: JSON.stringify({
-        model: 'gpt-4-vision', // Free tier model that can see images
+        model: 'xiaomi/mimo-v2-flash:free', // Free vision model with fast inference
         messages: [
           {
             role: 'user',
@@ -148,57 +154,92 @@ async function checkImageForNSFW(
               },
               {
                 type: 'text',
-                text: `Analyze this image and respond with ONLY a valid JSON object (no markdown, no code blocks):
+                text: `You are a strict content moderation AI for a digital asset marketplace.
+
+ANALYZE THIS IMAGE CAREFULLY and respond ONLY with valid JSON (no markdown, no code blocks, no explanations):
+
 {
   "is_nsfw": boolean,
   "confidence": number between 0 and 1,
-  "reason": string explaining your assessment
+  "category": string (one of: safe, adult, violence, illegal),
+  "reason": string (brief reason)
 }
 
-NSFW includes:
-- Nudity or partial nudity (breasts, genitals, buttocks)
-- Explicit sexual content or sexually suggestive poses
-- Extreme violence, gore, or graphic injuries
-- Drug use or paraphernalia
-- Hate speech or offensive symbols
+STRICTLY FLAG AS NSFW (adult/illegal/violence):
+- ANY nudity (full or partial: breasts, genitals, buttocks, nipples)
+- ANY explicit sexual content or sexually suggestive poses
+- Actual extreme violence, gore, or graphic injuries (blood/mutilation)
+- Weapons being used to harm people
+- Drug paraphernalia in use
+- Hate speech symbols
+- Any suggestive or erotic positioning/intent
 
-Be STRICT: When in doubt, flag as NSFW.
-For art/models: Anatomical references without sexualization = OK
-For photography: Even tasteful nudity = NSFW (flag it)`,
+DO NOT flag as NSFW:
+- Clothed people in normal poses
+- Anatomical diagrams with clear educational intent
+- Non-sexual art/photography
+- Cartoon characters (unless explicit)
+- Abstract/creative content without harmful intent
+
+IMPORTANT: When in doubt, set is_nsfw=true and high confidence.
+This is for public marketplace - err on side of caution.
+Even if artistic, flag nudity as NSFW.
+Be STRICT. This is a marketplace for family-friendly content.`,
               },
             ],
           },
         ],
         max_tokens: 150,
-        temperature: 0.1, // Low temperature for consistency
+        temperature: 0.1,
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`OpenRouter API error: ${JSON.stringify(error)}`);
+      const errorData = await response.text();
+      console.error(`OpenRouter API error (${response.status}):`, errorData);
+      throw new Error(`OpenRouter API error ${response.status}: ${errorData}`);
     }
 
     const data = (await response.json()) as any;
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid OpenRouter response:', data);
+      throw new Error('Invalid response format from OpenRouter API');
+    }
+
     const content = data.choices[0].message.content;
+    console.log(`📝 OpenRouter response: ${content.substring(0, 100)}...`);
 
     // Parse JSON from response (might be wrapped in markdown)
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error(`Failed to parse NSFW response: ${content}`);
+      console.error(`Failed to parse JSON from response: ${content}`);
+      throw new Error(`Failed to parse NSFW detection response`);
     }
 
-    const result = JSON.parse(jsonMatch[0]);
+    let result;
+    try {
+      result = JSON.parse(jsonMatch[0]);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError, 'Content:', jsonMatch[0]);
+      throw new Error('Invalid JSON in NSFW detection response');
+    }
+
+    const isNSFW = result.is_nsfw === true || result.confidence > 0.65;
+    const confidence = Number(result.confidence) || 0;
+    const reason = String(result.reason || 'No reason provided');
+
+    console.log(`✅ NSFW Check result - Is NSFW: ${isNSFW}, Confidence: ${confidence}, Category: ${result.category}`);
 
     return {
-      isNSFW: result.is_nsfw === true && result.confidence > 0.7,
-      confidence: result.confidence || 0,
-      reason: result.reason || 'Unable to determine',
+      isNSFW,
+      confidence,
+      reason: `[${result.category || 'unknown'}] ${reason}`,
     };
   } catch (error) {
-    console.error('NSFW check error:', error);
-    // Fail safe: treat as NSFW if we can't verify
-    throw new Error(`NSFW detection failed: ${error}`);
+    console.error('❌ NSFW check error:', error);
+    // FAIL SAFE: Reject the upload if we can't verify
+    throw new Error(`NSFW detection failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
