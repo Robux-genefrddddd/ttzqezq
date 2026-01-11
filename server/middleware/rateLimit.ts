@@ -1,7 +1,7 @@
 /**
  * Rate limiting middleware using in-memory store
  * For production, consider using Redis
- * 
+ *
  * Limits:
  * - Login: 5 attempts per 15 minutes per IP
  * - Signup: 10 accounts per hour per IP
@@ -9,7 +9,7 @@
  * - Uploads: 20 uploads per hour per user
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 interface RateLimitEntry {
   count: number;
@@ -26,7 +26,8 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 function createLimiter(
   windowMs: number, // Time window in milliseconds
   maxRequests: number, // Max requests per window
-  keyGenerator: (req: Request) => string = (req) => req.ip || req.socket.remoteAddress || 'unknown'
+  keyGenerator: (req: Request) => string = (req) =>
+    req.ip || req.socket.remoteAddress || "unknown",
 ) {
   return (req: Request, res: Response, next: NextFunction) => {
     const key = keyGenerator(req);
@@ -49,13 +50,13 @@ function createLimiter(
     const remaining = Math.max(0, maxRequests - entry.count);
     const resetDate = new Date(entry.resetTime);
 
-    res.set('X-RateLimit-Limit', maxRequests.toString());
-    res.set('X-RateLimit-Remaining', remaining.toString());
-    res.set('X-RateLimit-Reset', resetDate.toISOString());
+    res.set("X-RateLimit-Limit", maxRequests.toString());
+    res.set("X-RateLimit-Remaining", remaining.toString());
+    res.set("X-RateLimit-Reset", resetDate.toISOString());
 
     if (entry.count > maxRequests) {
       return res.status(429).json({
-        error: 'Too many requests',
+        error: "Too many requests",
         retryAfter: Math.ceil((entry.resetTime - now) / 1000),
         message: `Rate limit exceeded. Please try again in ${Math.ceil((entry.resetTime - now) / 1000)} seconds.`,
       });
@@ -102,10 +103,10 @@ export const emailVerificationLimiter = createLimiter(60 * 60 * 1000, 5);
 export function uploadLimiter(req: Request, res: Response, next: NextFunction) {
   // Requires authenticated user
   if (!req.user && !req.headers.authorization) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const userId = (req as any).user?.uid || 'anonymous';
+  const userId = (req as any).user?.uid || "anonymous";
   const key = `upload:${userId}`;
   const now = Date.now();
   const windowMs = 60 * 60 * 1000; // 1 hour
@@ -126,13 +127,13 @@ export function uploadLimiter(req: Request, res: Response, next: NextFunction) {
   const remaining = Math.max(0, maxUploads - entry.count);
   const resetDate = new Date(entry.resetTime);
 
-  res.set('X-Upload-Limit', maxUploads.toString());
-  res.set('X-Upload-Remaining', remaining.toString());
-  res.set('X-Upload-Reset', resetDate.toISOString());
+  res.set("X-Upload-Limit", maxUploads.toString());
+  res.set("X-Upload-Remaining", remaining.toString());
+  res.set("X-Upload-Reset", resetDate.toISOString());
 
   if (entry.count > maxUploads) {
     return res.status(429).json({
-      error: 'Upload limit exceeded',
+      error: "Upload limit exceeded",
       message: `You can only upload ${maxUploads} assets per hour. Please try again in ${Math.ceil((entry.resetTime - now) / 1000)} seconds.`,
       retryAfter: Math.ceil((entry.resetTime - now) / 1000),
     });
@@ -145,9 +146,13 @@ export function uploadLimiter(req: Request, res: Response, next: NextFunction) {
  * Message rate limiter (per user, per group)
  * 10 messages per minute per user per group
  */
-export function messageLimiter(req: Request, res: Response, next: NextFunction) {
-  const userId = (req as any).user?.uid || 'anonymous';
-  const groupId = req.params.groupId || 'unknown';
+export function messageLimiter(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = (req as any).user?.uid || "anonymous";
+  const groupId = req.params.groupId || "unknown";
   const key = `msg:${userId}:${groupId}`;
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute
@@ -167,7 +172,7 @@ export function messageLimiter(req: Request, res: Response, next: NextFunction) 
 
   if (entry.count > maxMessages) {
     return res.status(429).json({
-      error: 'Message rate limit exceeded',
+      error: "Message rate limit exceeded",
       message: `You can send at most ${maxMessages} messages per minute. Please slow down.`,
     });
   }
@@ -184,7 +189,8 @@ export function cleanupRateLimitStore() {
   let removed = 0;
 
   for (const [key, entry] of rateLimitStore.entries()) {
-    if (now > entry.resetTime + 60000) { // Remove entries 1 minute after expiry
+    if (now > entry.resetTime + 60000) {
+      // Remove entries 1 minute after expiry
       rateLimitStore.delete(key);
       removed++;
     }

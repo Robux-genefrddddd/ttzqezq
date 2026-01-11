@@ -5,6 +5,7 @@ This guide shows how to update client components to use the new secure Cloud Fun
 ## Overview
 
 The client-side auth logic is simplified:
+
 1. Client collects user input
 2. Client does minimal validation for UX (optional)
 3. Client calls Cloud Function (not direct Firestore writes)
@@ -18,12 +19,17 @@ The client-side auth logic is simplified:
 ## User Registration
 
 ### OLD WAY (UNSAFE)
+
 ```typescript
 // ❌ DON'T DO THIS
 export async function registerUser(email, password, username, displayName) {
   // Client directly creates auth user - NO VALIDATION
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
+
   // Client directly writes to Firestore - NO AUTHORIZATION CHECK
   // Could set any role they want!
   await setDoc(doc(db, "users", user.uid), {
@@ -36,9 +42,14 @@ export async function registerUser(email, password, username, displayName) {
 ```
 
 ### NEW WAY (SECURE)
+
 ```typescript
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { validateUsername, validateEmail, validatePassword } from "@shared/validation";
+import {
+  validateUsername,
+  validateEmail,
+  validatePassword,
+} from "@shared/validation";
 
 const functions = getFunctions();
 
@@ -47,7 +58,7 @@ export async function registerUser(
   email: string,
   password: string,
   username: string,
-  displayName: string
+  displayName: string,
 ) {
   try {
     // 1. CLIENT-SIDE VALIDATION (for UX only, not security)
@@ -68,7 +79,7 @@ export async function registerUser(
 
     // 2. CALL CLOUD FUNCTION (server-side validation + execution)
     const registerUserFn = httpsCallable(functions, "registerUser");
-    
+
     const result = await registerUserFn({
       email,
       password,
@@ -100,7 +111,7 @@ export async function loginUser(email: string, password: string) {
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email.trim().toLowerCase(),
-      password
+      password,
     );
 
     return userCredential.user;
@@ -118,6 +129,7 @@ export async function loginUser(email: string, password: string) {
 ## Profile Updates
 
 ### OLD WAY (UNSAFE)
+
 ```typescript
 // ❌ WRONG - Client modifies sensitive fields
 export async function updateUserProfile(uid, updates) {
@@ -130,6 +142,7 @@ export async function updateUserProfile(uid, updates) {
 ```
 
 ### NEW WAY (SECURE)
+
 ```typescript
 // ✅ CORRECT - Only update safe fields
 export async function updateUserProfile(
@@ -139,7 +152,7 @@ export async function updateUserProfile(
     bio?: string;
     profileImage?: string;
     // Don't include: role, earnings, memberRank, isBanned, etc.
-  }
+  },
 ) {
   try {
     // Validate input before sending to server
@@ -150,7 +163,7 @@ export async function updateUserProfile(
     // Call Cloud Function for sensitive operations
     // For simple updates, Firestore Rules will enforce field-level protection
     // updateDoc will fail silently for forbidden fields due to Firestore Rules
-    
+
     await updateDoc(doc(db, "users", uid), updates);
   } catch (error: any) {
     throw new Error("Failed to update profile");
@@ -169,7 +182,7 @@ All admin operations should go through Cloud Functions with server-side authoriz
 ```typescript
 export async function changeUserRole(
   userId: string,
-  newRole: "member" | "partner" | "admin" | "support"
+  newRole: "member" | "partner" | "admin" | "support",
 ) {
   try {
     const functions = getFunctions();
@@ -197,7 +210,7 @@ export async function changeUserRole(
 export async function banUserAccount(
   userId: string,
   reason: string,
-  durationDays?: number
+  durationDays?: number,
 ) {
   try {
     const functions = getFunctions();
@@ -223,18 +236,20 @@ export async function banUserAccount(
 ### Create Asset (Upload)
 
 ```typescript
-import { validateAssetName, validateAssetDescription, validateCategory } from "@shared/validation";
+import {
+  validateAssetName,
+  validateAssetDescription,
+  validateCategory,
+} from "@shared/validation";
 
-export async function createAsset(
-  assetData: {
-    name: string;
-    description: string;
-    category: string;
-    imageUrl: string;
-    price: number;
-    tags: string[];
-  }
-) {
+export async function createAsset(assetData: {
+  name: string;
+  description: string;
+  category: string;
+  imageUrl: string;
+  price: number;
+  tags: string[];
+}) {
   try {
     // CLIENT-SIDE VALIDATION (for UX)
     const nameVal = validateAssetName(assetData.name);
@@ -287,7 +302,7 @@ export async function downloadAsset(assetId: string, fileName: string) {
 
     // Then download the file via secure endpoint
     const response = await fetch(
-      `/api/download?filePath=assets/${assetId}/${fileName}`
+      `/api/download?filePath=assets/${assetId}/${fileName}`,
     );
 
     if (!response.ok) {
@@ -355,12 +370,12 @@ export function validateUsername(username: string): {
   errors: string[];
 } {
   const errors: string[] = [];
-  
+
   if (username.length < 3) {
     errors.push("Username must be at least 3 characters");
   }
   // ... more validation
-  
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -379,7 +394,7 @@ const validation = validateUsername(data.username);
 if (!validation.valid) {
   throw new functions.https.HttpsError(
     "invalid-argument",
-    validation.errors.join("; ")
+    validation.errors.join("; "),
   );
 }
 ```
@@ -395,7 +410,7 @@ import { storage } from "@/lib/firebase";
 export async function uploadAssetImage(
   assetId: string,
   file: File,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
 ): Promise<string> {
   try {
     // VALIDATE FILE (client-side, for UX)
@@ -409,10 +424,7 @@ export async function uploadAssetImage(
 
     // UPLOAD TO TEMP FOLDER (while processing)
     const userId = auth.currentUser!.uid;
-    const tempRef = ref(
-      storage,
-      `temp/${userId}/${Date.now()}-${file.name}`
-    );
+    const tempRef = ref(storage, `temp/${userId}/${Date.now()}-${file.name}`);
 
     // Upload with progress tracking
     const uploadTask = uploadBytesResumable(tempRef, file);
@@ -444,7 +456,7 @@ export async function uploadAssetImage(
           });
 
           resolve(assetId);
-        }
+        },
       );
     });
   } catch (error: any) {
@@ -465,14 +477,11 @@ Keep subscriptions safe by using Firestore Rules:
 
 export function subscribeToMyAssets(
   userId: string,
-  onUpdate: (assets: Asset[]) => void
+  onUpdate: (assets: Asset[]) => void,
 ) {
   // Firestore Rules ensure user can only see their own assets
   // Query will return empty if user tries to access other user's assets
-  const q = query(
-    collection(db, "assets"),
-    where("authorId", "==", userId)
-  );
+  const q = query(collection(db, "assets"), where("authorId", "==", userId));
 
   return onSnapshot(q, (snapshot) => {
     const assets = snapshot.docs.map((doc) => ({
@@ -486,7 +495,7 @@ export function subscribeToMyAssets(
 
 export function subscribeToMyProfile(
   userId: string,
-  onUpdate: (profile: UserProfile) => void
+  onUpdate: (profile: UserProfile) => void,
 ) {
   // Firestore Rules ensure user can only read their own profile
   return onSnapshot(doc(db, "users", userId), (doc) => {

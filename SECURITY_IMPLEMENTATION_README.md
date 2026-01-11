@@ -9,9 +9,11 @@ This document provides a quick reference for all security hardening implemented 
 ## What Was Implemented
 
 ### 1. ✅ Firestore Security Rules (firestore.rules)
+
 **Purpose:** Field-level access control to prevent unauthorized data access
 
 **Key Features:**
+
 - Users can only read/write their own documents (IDOR prevention)
 - Users cannot modify privileged fields: `role`, `earnings`, `memberRank`, `isBanned`
 - Only admins can view audit logs
@@ -19,6 +21,7 @@ This document provides a quick reference for all security hardening implemented 
 - Groups: only members can read messages
 
 **Deployment:**
+
 ```bash
 firebase deploy --only firestore:rules
 ```
@@ -26,15 +29,18 @@ firebase deploy --only firestore:rules
 ---
 
 ### 2. ✅ Firebase Storage Rules (storage.rules)
+
 **Purpose:** Restrict file uploads and downloads
 
 **Key Features:**
+
 - Image size limited to 5MB
 - Only PNG, JPEG, WebP allowed
 - Users can only write to their own temp folder
 - Prevents unauthorized file access
 
 **Deployment:**
+
 ```bash
 firebase deploy --only storage
 ```
@@ -44,6 +50,7 @@ firebase deploy --only storage
 ### 3. ✅ Cloud Functions for Privileged Operations
 
 #### Auth Functions (`server/functions/auth.ts`)
+
 - `registerUser` - User registration with full validation
 - `updateUserRole` - Admin-only role changes
 - `updateMemberRank` - Admin-only tier progression
@@ -51,6 +58,7 @@ firebase deploy --only storage
 - `unbanUser` - Admin-only account restoration
 
 #### Upload Handling (`server/functions/uploadHandling.ts`)
+
 - `onAssetUploaded` - Triggered on new upload
   - Scans image for NSFW content using OpenRouter API
   - Auto-rejects if inappropriate
@@ -60,11 +68,13 @@ firebase deploy --only storage
 - `checkExpiredBans` - Daily job to lift expired bans
 
 #### Audit Functions (`server/functions/audit.ts`)
+
 - `logAuditAction` - Logs all sensitive operations
 - `getAuditLogs` - Admin access to audit history
 - `checkSuspiciousActivity` - Detects abuse patterns
 
 **All functions enforce:**
+
 - Authentication checks
 - Authorization checks (admin-only operations)
 - Input validation
@@ -75,7 +85,8 @@ firebase deploy --only storage
 ### 4. ✅ Server-Side Input Validation (`server/validation/inputValidation.ts`)
 
 **Functions implemented:**
-- `validateUsername()` - 3-20 chars, allowed chars: a-z, 0-9, _, .
+
+- `validateUsername()` - 3-20 chars, allowed chars: a-z, 0-9, \_, .
 - `validateEmail()` - RFC 5322 format, uniqueness
 - `validateDisplayName()` - 2-50 chars, safe characters
 - `validatePassword()` - 8+ chars, uppercase, lowercase, number, special char
@@ -91,6 +102,7 @@ firebase deploy --only storage
 ### 5. ✅ NSFW Image Detection with OpenRouter API
 
 **How it works:**
+
 1. User uploads image → stored in temp folder
 2. Cloud Function triggered: `onAssetUploaded`
 3. Sends image URL to OpenRouter API (free vision model)
@@ -103,11 +115,13 @@ firebase deploy --only storage
    - Available on marketplace
 
 **Configuration:**
+
 ```bash
 firebase functions:config:set openrouter.api_key="sk-..."
 ```
 
 **Strict Detection:**
+
 - Flags all nudity (even artistic/anatomical)
 - Flags explicit sexual content
 - Flags extreme violence/gore
@@ -120,6 +134,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 **Collection:** `audit_logs` (append-only, admin-read-only)
 
 **Logged Actions:**
+
 - `USER_REGISTERED` - New user signup
 - `ROLE_CHANGED` - Role modifications
 - `USER_BANNED` / `USER_UNBANNED` - Ban actions
@@ -130,6 +145,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 - `AUTO_BAN_TRIGGERED` - Automatic bans
 
 **Each log contains:**
+
 - Timestamp
 - Actor ID (who did it)
 - Action type
@@ -151,6 +167,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 | Messages | 10 messages | 1 min |
 
 **How it works:**
+
 - In-memory store (perfect for dev/small scale)
 - Production: replace with Redis for distributed systems
 - Returns 429 status code when limit exceeded
@@ -161,6 +178,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 ### 8. ✅ Secure Download Endpoint (`server/routes/download.ts`)
 
 **Security features:**
+
 - Validates file path (prevents directory traversal)
 - Only allows downloads from `assets/` and `temp/` folders
 - Verifies asset exists and is published
@@ -174,6 +192,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 ### 9. ✅ Server Security Enhancements (`server/index.ts`)
 
 **Security headers added:**
+
 - `X-Content-Type-Options: nosniff` - Prevent MIME sniffing
 - `X-XSS-Protection: 1; mode=block` - XSS protection
 - `X-Frame-Options: DENY` - Prevent iframe embedding
@@ -181,6 +200,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 - CORS configured for specific origins only
 
 **Middleware applied:**
+
 - Rate limiting on all `/api/` routes
 - Body size limits (10MB)
 - JSON parsing configured
@@ -190,6 +210,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 ## Quick Start: Deploying Security Updates
 
 ### Step 1: Update Local Environment
+
 ```bash
 # Create .env.local with secrets (NEVER commit!)
 REACT_APP_FIREBASE_PROJECT_ID=keysystem-d0b86-8df89
@@ -200,6 +221,7 @@ firebase functions:config:set openrouter.api_key="sk-..."
 ```
 
 ### Step 2: Deploy Firebase Rules
+
 ```bash
 # Deploy Firestore rules
 firebase deploy --only firestore:rules
@@ -212,6 +234,7 @@ firebase deploy --only functions
 ```
 
 ### Step 3: Verify Deployment
+
 ```bash
 # Check function logs
 firebase functions:log
@@ -256,7 +279,9 @@ firebase functions:log
 ## Security Principles Applied
 
 ### ✅ Defense in Depth
+
 Multiple layers of protection:
+
 1. Client-side validation (UX)
 2. Server-side validation (security)
 3. Firestore Rules (authorization)
@@ -264,17 +289,20 @@ Multiple layers of protection:
 5. Audit logging (monitoring)
 
 ### ✅ Least Privilege
+
 - Users have minimal permissions by default
 - Admins explicitly granted via Cloud Function
 - Roles can't be self-assigned
 - Each operation checked for authorization
 
 ### ✅ Zero Trust
+
 - Never trust client input or client-submitted user ID
 - All sensitive operations verified server-side
 - Firestore Rules act as second authorization layer
 
 ### ✅ Fail Secure
+
 - When in doubt, reject the operation
 - NSFW scan: fail = reject upload
 - Rate limit exceeded: reject request
@@ -282,29 +310,31 @@ Multiple layers of protection:
 
 ### ✅ Defense Against:
 
-| Threat | Defense |
-|--------|---------|
-| **SQL Injection** | Using Firestore (NoSQL), no string concatenation |
-| **IDOR** | Firestore Rules check `request.auth.uid == userId` |
-| **Auth Bypass** | Cloud Functions validate all role changes |
-| **Privilege Escalation** | Users can't modify `role`, `memberRank`, `earnings` |
-| **NSFW Upload** | OpenRouter API + strict confidence threshold |
-| **Rate Abuse** | Rate limiting on all endpoints |
-| **Mass Data Exfiltration** | Firestore Rules restrict reads to own documents |
-| **Account Enumeration** | Username validated on server only |
-| **Client Tampering** | All authorization checks server-side |
+| Threat                     | Defense                                             |
+| -------------------------- | --------------------------------------------------- |
+| **SQL Injection**          | Using Firestore (NoSQL), no string concatenation    |
+| **IDOR**                   | Firestore Rules check `request.auth.uid == userId`  |
+| **Auth Bypass**            | Cloud Functions validate all role changes           |
+| **Privilege Escalation**   | Users can't modify `role`, `memberRank`, `earnings` |
+| **NSFW Upload**            | OpenRouter API + strict confidence threshold        |
+| **Rate Abuse**             | Rate limiting on all endpoints                      |
+| **Mass Data Exfiltration** | Firestore Rules restrict reads to own documents     |
+| **Account Enumeration**    | Username validated on server only                   |
+| **Client Tampering**       | All authorization checks server-side                |
 
 ---
 
 ## Monitoring & Maintenance
 
 ### Daily
+
 ```javascript
 // Check for suspicious activity
 firebase firestore:query audit_logs --limit=100
 ```
 
 ### Weekly
+
 ```javascript
 // Review failed operations
 firebase firestore:query audit_logs \
@@ -313,12 +343,14 @@ firebase firestore:query audit_logs \
 ```
 
 ### Monthly
+
 - Review user warnings and bans
 - Check rate limit effectiveness
 - Audit admin operations
 - Verify backup completeness
 
 ### Quarterly
+
 - Penetration testing
 - Dependency updates
 - Security audit of new features
@@ -329,28 +361,34 @@ firebase firestore:query audit_logs \
 ## Troubleshooting
 
 ### User Can't Upload Images
+
 1. Check Firestore status is 'uploading'
 2. Verify OpenRouter API key is set
 3. Check Cloud Function logs: `firebase functions:log`
 4. Test with known-safe image first
 
 ### "Permission denied" on user updates
+
 ✅ Expected! Firestore Rules preventing update to protected fields.
+
 - Update only safe fields: displayName, profileImage, etc.
 - Use Cloud Functions for privileged changes
 
 ### Rate limiting not working
+
 - Check if in-memory store is enabled
 - For production with multiple servers: use Redis instead
 - Test with: `for i in {1..10}; do curl http://localhost:3000/api/ping; done`
 
 ### NSFW detection too strict/lenient
+
 - Adjust confidence threshold in `uploadHandling.ts`
 - Current: 0.7 (70% confidence)
 - Stricter: increase to 0.8 or 0.9
 - Looser: decrease to 0.5 or 0.6
 
 ### Cloud Function timeouts
+
 - Check file size (max 100MB recommended)
 - Check OpenRouter API response time
 - Increase timeout in `firebase.json`
@@ -360,6 +398,7 @@ firebase firestore:query audit_logs \
 ## Security Incident Response
 
 ### Suspected Compromise
+
 1. **Immediate:** Disable database access
 2. **Investigation:** Review `audit_logs` for suspicious activity
 3. **Containment:** Ban affected user accounts
@@ -368,6 +407,7 @@ firebase firestore:query audit_logs \
 6. **Post-Incident:** Update security measures
 
 ### NSFW Content Bypass
+
 1. Disable NSFW detection (temporarily)
 2. Manually scan recent uploads
 3. Quarantine suspicious assets
@@ -375,6 +415,7 @@ firebase firestore:query audit_logs \
 5. Re-enable with stricter threshold
 
 ### Data Breach
+
 1. Enable Firestore backup immediately
 2. Invalidate all sessions
 3. Force password reset for all users
@@ -385,29 +426,31 @@ firebase firestore:query audit_logs \
 
 ## Documentation Files
 
-| File | Purpose |
-|------|---------|
-| `SECURITY_HARDENING_GUIDE.md` | Comprehensive security audit & threat model |
-| `DEPLOYMENT_SECURITY_CHECKLIST.md` | Pre-deployment security verification |
-| `CLIENT_INTEGRATION_GUIDE.md` | How to call Cloud Functions from client |
-| `firestore.rules` | Firestore authorization rules |
-| `storage.rules` | Storage upload restrictions |
-| `server/validation/inputValidation.ts` | Input validation functions |
-| `server/functions/auth.ts` | Authentication Cloud Functions |
-| `server/functions/uploadHandling.ts` | Upload & NSFW scanning |
-| `server/functions/audit.ts` | Audit logging |
-| `server/middleware/rateLimit.ts` | Rate limiting |
+| File                                   | Purpose                                     |
+| -------------------------------------- | ------------------------------------------- |
+| `SECURITY_HARDENING_GUIDE.md`          | Comprehensive security audit & threat model |
+| `DEPLOYMENT_SECURITY_CHECKLIST.md`     | Pre-deployment security verification        |
+| `CLIENT_INTEGRATION_GUIDE.md`          | How to call Cloud Functions from client     |
+| `firestore.rules`                      | Firestore authorization rules               |
+| `storage.rules`                        | Storage upload restrictions                 |
+| `server/validation/inputValidation.ts` | Input validation functions                  |
+| `server/functions/auth.ts`             | Authentication Cloud Functions              |
+| `server/functions/uploadHandling.ts`   | Upload & NSFW scanning                      |
+| `server/functions/audit.ts`            | Audit logging                               |
+| `server/middleware/rateLimit.ts`       | Rate limiting                               |
 
 ---
 
 ## Next Steps
 
 1. **Set up OpenRouter API**
+
    ```bash
    firebase functions:config:set openrouter.api_key="sk-..."
    ```
 
 2. **Deploy to production**
+
    ```bash
    firebase deploy
    ```
@@ -435,15 +478,19 @@ firebase firestore:query audit_logs \
 ## Support & Questions
 
 **For implementation questions:**
+
 - See `CLIENT_INTEGRATION_GUIDE.md`
 
 **For deployment issues:**
+
 - See `DEPLOYMENT_SECURITY_CHECKLIST.md`
 
 **For threat model details:**
+
 - See `SECURITY_HARDENING_GUIDE.md`
 
 **For code review:**
+
 - Review `firestore.rules` in Firebase Console
 - Review `server/functions/` for logic
 - Check `server/validation/` for validation rules

@@ -7,6 +7,7 @@ Your marketplace has **dual-layer NSFW detection** protecting against inappropri
 ## 📋 What's Being Checked
 
 ### Image NSFW Detection (OpenRouter)
+
 - ✅ Nudity (full or partial)
 - ✅ Explicit sexual content
 - ✅ Extreme violence/gore
@@ -15,6 +16,7 @@ Your marketplace has **dual-layer NSFW detection** protecting against inappropri
 - 🟢 Uses: `xiaomi/mimo-v2-flash:free` (FREE)
 
 ### Text NSFW Detection (JigsawStack)
+
 - ✅ Inappropriate asset names
 - ✅ Inappropriate descriptions
 - ✅ Inappropriate tags
@@ -43,6 +45,7 @@ firebase functions:config:get
 ```
 
 Output should show:
+
 ```
 jigsawstack:
   api_key: sk_5506ef97597c4796f564f61eeae71d457f4c1f6d04a92be60b1438b10fa1fa5759544c1ad837ce64261b06c5c123b99085e04f921766ac704b7c8332fa0959c5024VXVamo5aWD3ctTs0eo
@@ -57,6 +60,7 @@ firebase deploy --only functions
 ```
 
 Wait for deployment to complete. Output should show:
+
 ```
 ✅ functions: Trigger http function successful
 ✅ functions: onAssetUploaded Firestore trigger successful
@@ -86,15 +90,18 @@ After deployment, verify everything is working:
 ## 🧪 Test Cases
 
 ### Test 1: Normal Asset Upload ✅
+
 ```
 Name: "Realistic Camera Rig"
 Description: "High-quality camera with smooth controls"
 Image: Normal landscape photo
 Tags: "camera, animation, 3D"
 ```
+
 **Expected:** ✅ Asset published in 5-10 seconds
 
 **Check logs for:**
+
 ```
 📝 Checking "Asset Name": "Realistic Camera Rig"
    Emotion: neutral, Sentiment: positive, Score: ...
@@ -104,15 +111,18 @@ Tags: "camera, animation, 3D"
 ```
 
 ### Test 2: Explicit Name ❌
+
 ```
 Name: "sex toys collection"
 Description: "Normal description"
 Image: Normal image
 Tags: "collection"
 ```
+
 **Expected:** ❌ Rejected - inappropriate asset name
 
 **Check logs for:**
+
 ```
 📝 Checking "Asset Name": "sex toys collection"
 ⛔ NSFW TEXT DETECTED in Asset Name
@@ -120,20 +130,24 @@ Tags: "collection"
 ```
 
 **Check Firestore:**
+
 - Asset `status`: `rejected`
 - Asset `rejectionReason`: contains "Inappropriate content"
 - User `warnings`: 1 new warning created
 
 ### Test 3: Explicit Image ❌
+
 ```
 Name: "Normal Name"
 Description: "Normal description"
 Image: Nude/explicit photo
 Tags: "normal, tags"
 ```
+
 **Expected:** ❌ Rejected - inappropriate image
 
 **Check logs for:**
+
 ```
 📝 Checking "Asset Name": "Normal Name"
 📤 Calling OpenRouter API for image NSFW detection...
@@ -145,9 +159,11 @@ Tags: "normal, tags"
 ```
 
 ### Test 4: Auto-Ban Test (3 Rejections) 🔒
+
 Upload 3 assets with explicit content (either text or image)
 
 **After 3rd rejection:**
+
 - User account status: `isBanned: true`
 - `banReason`: "Automatic 7-day ban: 3 warnings for upload_abuse"
 - Firebase Auth: User disabled
@@ -167,6 +183,7 @@ firebase functions:log --follow | grep "NSFW\|Checking\|PASSED\|REJECTED"
 ### Check Rejected Uploads
 
 In Firebase Console:
+
 - Go to Firestore → `assets` collection
 - Filter: `status == rejected`
 - See all rejected uploads with rejection reasons
@@ -174,6 +191,7 @@ In Firebase Console:
 ### Check User Warnings
 
 In Firebase Console:
+
 - Go to Firestore → `warnings` collection
 - Filter: `reason == upload_abuse`
 - See warning count per user
@@ -181,6 +199,7 @@ In Firebase Console:
 ### Check Audit Logs
 
 In Firebase Console:
+
 - Go to Firestore → `audit_logs` collection
 - Filter: `action == "UPLOAD_REJECTED_NSFW_TEXT"` or `action == "UPLOAD_REJECTED_NSFW"`
 - See detailed rejection information
@@ -194,6 +213,7 @@ In Firebase Console:
 **Symptoms:** Upload doesn't complete or show error
 
 **Solutions:**
+
 1. Check API quota limits (JigsawStack, OpenRouter)
 2. Check Cloud Function timeout (should be 60+ seconds)
 3. Verify image URL is accessible
@@ -204,6 +224,7 @@ In Firebase Console:
 **Symptoms:** Normal images being rejected as NSFW
 
 **Solutions:**
+
 1. Check confidence threshold in `uploadHandling.ts` (currently 0.65)
 2. Adjust threshold: Change `0.65` to `0.75` for less strict
 3. Redeploy: `firebase deploy --only functions`
@@ -213,6 +234,7 @@ In Firebase Console:
 **Symptoms:** Inappropriate content still appears in marketplace
 
 **Solutions:**
+
 1. Check if API keys are set: `firebase functions:config:get`
 2. Check function logs for API errors
 3. Verify image/text is actually inappropriate
@@ -224,6 +246,7 @@ In Firebase Console:
 **Symptoms:** Logs show "401 Unauthorized" or "Invalid API key"
 
 **Solutions:**
+
 1. **For OpenRouter:** Check key starts with `sk-or-v1-`
 2. **For JigsawStack:** Check key starts with `sk_`
 3. Verify no extra spaces: `firebase functions:config:get | cat`
@@ -235,16 +258,19 @@ In Firebase Console:
 ## 📈 Performance Metrics
 
 ### Upload Processing Time
+
 - Text analysis: ~1-2 seconds
 - Image analysis: ~2-5 seconds
 - Total: ~3-7 seconds per upload
 
 ### Accuracy
+
 - Image NSFW: ~85-90% accurate
 - Text NSFW: ~80-85% accurate
 - Combined: Very low false negatives (strict)
 
 ### Cost
+
 - OpenRouter: **FREE** (xiaomi/mimo-v2-flash:free)
 - JigsawStack: Check your quota (provided key)
 
@@ -253,16 +279,19 @@ In Firebase Console:
 ## 🔒 Security Considerations
 
 ### API Keys
+
 ✅ Stored in Firebase environment variables (not in code)
 ✅ Never exposed to frontend
 ✅ Rotate keys every 3 months
 
 ### Fail-Safe Behavior
+
 ✅ If API unavailable: rejects upload (safe)
 ✅ If invalid image: rejects upload (safe)
 ✅ If text check fails: continues to image check (non-blocking)
 
 ### User Data
+
 ✅ Rejection reasons logged
 ✅ Warnings tracked
 ✅ Auto-ban enforced after 3 violations
@@ -275,11 +304,13 @@ In Firebase Console:
 ### Adjust Image Detection Sensitivity
 
 In `uploadHandling.ts`, line ~354:
+
 ```typescript
 isNSFW: result.is_nsfw === true || result.confidence > 0.65,
 ```
 
 Change `0.65` to:
+
 - `0.5` = More strict (catch more, more false positives)
 - `0.65` = Balanced (recommended)
 - `0.8` = More lenient (miss some NSFW)
@@ -287,10 +318,19 @@ Change `0.65` to:
 ### Adjust Text Detection Sensitivity
 
 In `uploadHandling.ts`, line ~340:
+
 ```typescript
 const nsfwEmotions = [
-  'anger', 'hatred', 'disgust', 'obscenity', 'explicit',
-  'sexual', 'profanity', 'slur', 'abuse', 'harassment',
+  "anger",
+  "hatred",
+  "disgust",
+  "obscenity",
+  "explicit",
+  "sexual",
+  "profanity",
+  "slur",
+  "abuse",
+  "harassment",
 ];
 ```
 
@@ -299,6 +339,7 @@ Add more keywords for stricter checking.
 ### Adjust Ban Duration
 
 In `uploadHandling.ts`, line ~405:
+
 ```typescript
 const banUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 ```
@@ -310,14 +351,17 @@ Change `7` to desired days: `3`, `14`, `30`, etc.
 ## 📞 Support & Documentation
 
 **For Image NSFW Questions:**
+
 - See: `NSFW_DETECTION_DEPLOYMENT.md`
 - OpenRouter Docs: https://openrouter.ai/docs
 
 **For Text NSFW Questions:**
+
 - See: `JIGSAWSTACK_NSFW_INTEGRATION.md`
 - JigsawStack Docs: https://jigsawstack.com/docs
 
 **For Deployment Issues:**
+
 - Firebase Console: https://console.firebase.google.com
 - Function Logs: `firebase functions:log --follow`
 - Error Messages: Usually indicate exact problem
@@ -347,16 +391,19 @@ Before going live:
 Your marketplace is protected against:
 
 ✅ **Image Content**
+
 - Nudity, explicit sexual content
 - Extreme violence, gore
 - Drug use, hate symbols
 
 ✅ **Text Content**
+
 - Inappropriate asset names
 - Inappropriate descriptions
 - Inappropriate tags
 
 ✅ **User Behavior**
+
 - Warnings tracking
 - Automatic 7-day ban after 3 violations
 - Complete audit trail
@@ -368,12 +415,14 @@ Your marketplace is protected against:
 ## 📞 Emergency Contacts
 
 **If explicit content bypasses detection:**
+
 1. Check logs: `firebase functions:log --follow`
 2. Manually ban user: Firebase Console → Users
 3. Delete inappropriate assets: Firestore → assets collection
 4. Review and adjust thresholds
 
 **If system is down:**
+
 1. Check API status pages
 2. Verify API keys are set
 3. Check Cloud Function status in Firebase Console

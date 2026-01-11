@@ -34,7 +34,9 @@ export const handleDownload: RequestHandler = async (req, res) => {
       filePath.startsWith("/") ||
       filePath.includes("\\")
     ) {
-      console.warn(`⚠️  Directory traversal attempt: ${filePath} from ${clientIp}`);
+      console.warn(
+        `⚠️  Directory traversal attempt: ${filePath} from ${clientIp}`,
+      );
       return res.status(400).json({
         error: "Invalid file path",
       });
@@ -43,7 +45,7 @@ export const handleDownload: RequestHandler = async (req, res) => {
     // Only allow downloads from assets and temp folders
     if (!filePath.startsWith("assets/") && !filePath.startsWith("temp/")) {
       console.warn(
-        `⚠️  Unauthorized download path: ${filePath} from ${clientIp}`
+        `⚠️  Unauthorized download path: ${filePath} from ${clientIp}`,
       );
       return res.status(403).json({
         error: "Access denied",
@@ -65,9 +67,7 @@ export const handleDownload: RequestHandler = async (req, res) => {
       const assetDoc = await db.collection("assets").doc(assetId).get();
 
       if (!assetDoc.exists) {
-        console.warn(
-          `⚠️  Download attempt for non-existent asset: ${assetId}`
-        );
+        console.warn(`⚠️  Download attempt for non-existent asset: ${assetId}`);
         return res.status(404).json({
           error: "File not found",
           code: "OBJECT_NOT_FOUND",
@@ -79,7 +79,7 @@ export const handleDownload: RequestHandler = async (req, res) => {
       // Only allow downloading published assets
       if (asset.status !== "published") {
         console.warn(
-          `⚠️  Download attempt for non-published asset: ${assetId}`
+          `⚠️  Download attempt for non-published asset: ${assetId}`,
         );
         return res.status(403).json({
           error: "Asset is not available for download",
@@ -109,7 +109,7 @@ export const handleDownload: RequestHandler = async (req, res) => {
 
     if (!response.ok) {
       console.error(
-        `Firebase Storage error: ${response.status} ${response.statusText} for ${filePath}`
+        `Firebase Storage error: ${response.status} ${response.statusText} for ${filePath}`,
       );
 
       if (response.status === 404) {
@@ -145,13 +145,11 @@ export const handleDownload: RequestHandler = async (req, res) => {
       "audio/",
     ];
 
-    const isAllowed = allowedTypes.some((type) =>
-      contentType.startsWith(type)
-    );
+    const isAllowed = allowedTypes.some((type) => contentType.startsWith(type));
 
     if (!isAllowed) {
       console.warn(
-        `⚠️  Suspicious content type: ${contentType} for ${filePath}`
+        `⚠️  Suspicious content type: ${contentType} for ${filePath}`,
       );
       return res.status(403).json({
         error: "File type not allowed",
@@ -172,7 +170,7 @@ export const handleDownload: RequestHandler = async (req, res) => {
     res.setHeader("Content-Type", contentType);
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${fileName || filePath.split("/").pop() || "file"}"`
+      `attachment; filename="${fileName || filePath.split("/").pop() || "file"}"`,
     );
     res.setHeader("Content-Length", bufferSize);
     res.setHeader("Cache-Control", "public, max-age=3600");

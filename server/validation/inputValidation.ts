@@ -20,64 +20,64 @@ export function validateUsername(username: string): {
   const errors: string[] = [];
 
   // Normalize
-  if (!username || typeof username !== 'string') {
-    return { valid: false, errors: ['Username is required'] };
+  if (!username || typeof username !== "string") {
+    return { valid: false, errors: ["Username is required"] };
   }
 
   const normalized = username.trim();
 
   // Length
   if (normalized.length < 3) {
-    errors.push('Username must be at least 3 characters');
+    errors.push("Username must be at least 3 characters");
   }
   if (normalized.length > 20) {
-    errors.push('Username must be at most 20 characters');
+    errors.push("Username must be at most 20 characters");
   }
 
   // Allowed characters (lowercase: a-z, 0-9, _, .)
   if (!/^[a-z0-9_.]+$/.test(normalized.toLowerCase())) {
     errors.push(
-      'Username can only contain lowercase letters, numbers, dots, and underscores'
+      "Username can only contain lowercase letters, numbers, dots, and underscores",
     );
   }
 
   // Cannot start/end with . or _
   if (/^[._]/.test(normalized)) {
-    errors.push('Username cannot start with a dot or underscore');
+    errors.push("Username cannot start with a dot or underscore");
   }
   if (/[._]$/.test(normalized)) {
-    errors.push('Username cannot end with a dot or underscore');
+    errors.push("Username cannot end with a dot or underscore");
   }
 
   // No consecutive . or _
   if (/\.\./.test(normalized)) {
-    errors.push('Username cannot contain consecutive dots');
+    errors.push("Username cannot contain consecutive dots");
   }
   if (/__/.test(normalized)) {
-    errors.push('Username cannot contain consecutive underscores');
+    errors.push("Username cannot contain consecutive underscores");
   }
 
   // Reserved words
   const reserved = new Set([
-    'admin',
-    'support',
-    'moderator',
-    'founder',
-    'system',
-    'root',
-    'test',
-    'demo',
-    'bot',
-    'unknown',
-    'anonymous',
-    'null',
-    'undefined',
-    'api',
-    'www',
+    "admin",
+    "support",
+    "moderator",
+    "founder",
+    "system",
+    "root",
+    "test",
+    "demo",
+    "bot",
+    "unknown",
+    "anonymous",
+    "null",
+    "undefined",
+    "api",
+    "www",
   ]);
 
   if (reserved.has(normalized.toLowerCase())) {
-    errors.push('Username is reserved and cannot be used');
+    errors.push("Username is reserved and cannot be used");
   }
 
   return {
@@ -100,8 +100,8 @@ export function validateEmail(email: string): {
 } {
   const errors: string[] = [];
 
-  if (!email || typeof email !== 'string') {
-    return { valid: false, errors: ['Email is required'] };
+  if (!email || typeof email !== "string") {
+    return { valid: false, errors: ["Email is required"] };
   }
 
   // Normalize: trim + lowercase
@@ -109,10 +109,10 @@ export function validateEmail(email: string): {
 
   // Length
   if (normalized.length > 254) {
-    errors.push('Email is too long (max 254 characters)');
+    errors.push("Email is too long (max 254 characters)");
   }
   if (normalized.length < 5) {
-    errors.push('Email is too short');
+    errors.push("Email is too short");
   }
 
   // RFC 5322 simplified regex
@@ -121,12 +121,12 @@ export function validateEmail(email: string): {
     /^[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
 
   if (!emailRegex.test(normalized)) {
-    errors.push('Invalid email format');
+    errors.push("Invalid email format");
   }
 
   // No control characters or tabs
   if (/[\x00-\x1F\x7F]/.test(normalized)) {
-    errors.push('Email contains invalid characters');
+    errors.push("Email contains invalid characters");
   }
 
   return {
@@ -148,35 +148,35 @@ export function validateDisplayName(displayName: string): {
 } {
   const errors: string[] = [];
 
-  if (!displayName || typeof displayName !== 'string') {
-    return { valid: false, errors: ['Display name is required'] };
+  if (!displayName || typeof displayName !== "string") {
+    return { valid: false, errors: ["Display name is required"] };
   }
 
   const normalized = displayName.trim();
 
   // Length
   if (normalized.length < 2) {
-    errors.push('Display name must be at least 2 characters');
+    errors.push("Display name must be at least 2 characters");
   }
   if (normalized.length > 50) {
-    errors.push('Display name must be at most 50 characters');
+    errors.push("Display name must be at most 50 characters");
   }
 
   // Allowed characters
   if (!/^[a-zA-Z0-9\s\-']+$/.test(normalized)) {
     errors.push(
-      'Display name can only contain letters, numbers, spaces, hyphens, and apostrophes'
+      "Display name can only contain letters, numbers, spaces, hyphens, and apostrophes",
     );
   }
 
   // No control characters
   if (/[\x00-\x1F\x7F]/.test(normalized)) {
-    errors.push('Display name contains invalid characters');
+    errors.push("Display name contains invalid characters");
   }
 
   // No excessive spaces
   if (/\s{2,}/.test(normalized)) {
-    errors.push('Display name cannot contain excessive spaces');
+    errors.push("Display name cannot contain excessive spaces");
   }
 
   return {
@@ -200,36 +200,38 @@ export function validatePassword(password: string): {
 } {
   const errors: string[] = [];
 
-  if (!password || typeof password !== 'string') {
-    return { valid: false, errors: ['Password is required'] };
+  if (!password || typeof password !== "string") {
+    return { valid: false, errors: ["Password is required"] };
   }
 
   // Length
   if (password.length < 8) {
-    errors.push('Password must be at least 8 characters');
+    errors.push("Password must be at least 8 characters");
   }
   if (password.length > 128) {
-    errors.push('Password must be at most 128 characters');
+    errors.push("Password must be at most 128 characters");
   }
 
   // Uppercase
   if (!/[A-Z]/.test(password)) {
-    errors.push('Password must contain at least one uppercase letter');
+    errors.push("Password must contain at least one uppercase letter");
   }
 
   // Lowercase
   if (!/[a-z]/.test(password)) {
-    errors.push('Password must contain at least one lowercase letter');
+    errors.push("Password must contain at least one lowercase letter");
   }
 
   // Number
   if (!/[0-9]/.test(password)) {
-    errors.push('Password must contain at least one number');
+    errors.push("Password must contain at least one number");
   }
 
   // Special character
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    errors.push('Password must contain at least one special character (!@#$%^&*)');
+    errors.push(
+      "Password must contain at least one special character (!@#$%^&*)",
+    );
   }
 
   return {
@@ -250,7 +252,7 @@ export function validateTextField(
     maxLength?: number;
     allowNewlines?: boolean;
     allowSpecialChars?: boolean;
-  } = {}
+  } = {},
 ): {
   valid: boolean;
   errors: string[];
@@ -263,7 +265,7 @@ export function validateTextField(
     allowSpecialChars = true,
   } = options;
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return { valid: false, errors: [`${fieldName} must be a string`] };
   }
 
@@ -271,14 +273,10 @@ export function validateTextField(
 
   // Length
   if (trimmed.length < minLength) {
-    errors.push(
-      `${fieldName} must be at least ${minLength} characters`
-    );
+    errors.push(`${fieldName} must be at least ${minLength} characters`);
   }
   if (trimmed.length > maxLength) {
-    errors.push(
-      `${fieldName} must be at most ${maxLength} characters`
-    );
+    errors.push(`${fieldName} must be at most ${maxLength} characters`);
   }
 
   // Control characters (except optional newlines)
@@ -291,8 +289,7 @@ export function validateTextField(
   }
 
   // Excessive invisible Unicode (zero-width chars, etc.)
-  const invisibleCount = (trimmed.match(/[\u200B-\u200D\uFEFF]/g) || [])
-    .length;
+  const invisibleCount = (trimmed.match(/[\u200B-\u200D\uFEFF]/g) || []).length;
   if (invisibleCount > 5) {
     errors.push(`${fieldName} contains too many invisible characters`);
   }
@@ -318,7 +315,7 @@ export function validateAssetName(name: string): {
   valid: boolean;
   errors: string[];
 } {
-  return validateTextField(name, 'Asset name', {
+  return validateTextField(name, "Asset name", {
     minLength: 3,
     maxLength: 100,
     allowNewlines: false,
@@ -332,7 +329,7 @@ export function validateAssetDescription(description: string): {
   valid: boolean;
   errors: string[];
 } {
-  return validateTextField(description, 'Description', {
+  return validateTextField(description, "Description", {
     minLength: 0,
     maxLength: 2000,
     allowNewlines: true,
@@ -350,18 +347,18 @@ export function validateTags(tagsString: string): {
   const errors: string[] = [];
   const tags: string[] = [];
 
-  if (!tagsString || typeof tagsString !== 'string') {
+  if (!tagsString || typeof tagsString !== "string") {
     return { valid: true, tags: [], errors: [] };
   }
 
   const tagArray = tagsString
-    .split(',')
+    .split(",")
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
 
   // Max 10 tags
   if (tagArray.length > 10) {
-    errors.push('Maximum 10 tags allowed');
+    errors.push("Maximum 10 tags allowed");
   }
 
   // Each tag validation
@@ -376,7 +373,7 @@ export function validateTags(tagsString: string): {
     }
     if (!/^[a-z0-9\-]+$/.test(tag.toLowerCase())) {
       errors.push(
-        `Tag "${tag}" contains invalid characters (only letters, numbers, hyphens)`
+        `Tag "${tag}" contains invalid characters (only letters, numbers, hyphens)`,
       );
       continue;
     }
@@ -402,20 +399,20 @@ export function validatePrice(price: any): {
   const numPrice = Number(price);
 
   if (isNaN(numPrice)) {
-    return { valid: false, errors: ['Price must be a number'] };
+    return { valid: false, errors: ["Price must be a number"] };
   }
 
   if (numPrice < 0) {
-    errors.push('Price cannot be negative');
+    errors.push("Price cannot be negative");
   }
 
   if (numPrice > 99999) {
-    errors.push('Price cannot exceed $99,999');
+    errors.push("Price cannot exceed $99,999");
   }
 
   // Only 2 decimal places
   if (numPrice !== Math.round(numPrice * 100) / 100) {
-    errors.push('Price can only have up to 2 decimal places');
+    errors.push("Price can only have up to 2 decimal places");
   }
 
   return {
@@ -432,22 +429,20 @@ export function validateCategory(category: string): {
   errors: string[];
 } {
   const validCategories = [
-    '3D Models',
-    'UI Design',
-    'Scripts',
-    'Animations',
-    'Plugins',
-    'Sounds',
-    'Images',
-    'Other',
+    "3D Models",
+    "UI Design",
+    "Scripts",
+    "Animations",
+    "Plugins",
+    "Sounds",
+    "Images",
+    "Other",
   ];
 
   if (!validCategories.includes(category)) {
     return {
       valid: false,
-      errors: [
-        `Invalid category. Allowed: ${validCategories.join(', ')}`,
-      ],
+      errors: [`Invalid category. Allowed: ${validCategories.join(", ")}`],
     };
   }
 
@@ -468,27 +463,27 @@ export function validateFileUpload(file: {
   const errors: string[] = [];
   const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB for asset files
   const ALLOWED_TYPES = [
-    'image/png',
-    'image/jpeg',
-    'image/webp',
-    'application/zip',
-    'application/x-zip-compressed',
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "application/zip",
+    "application/x-zip-compressed",
   ];
 
   // Filename validation
   if (!file.name || file.name.length === 0) {
-    errors.push('Filename is required');
+    errors.push("Filename is required");
   }
   if (file.name.length > 255) {
-    errors.push('Filename is too long');
+    errors.push("Filename is too long");
   }
   if (/[\x00-\x1F]/.test(file.name)) {
-    errors.push('Filename contains invalid characters');
+    errors.push("Filename contains invalid characters");
   }
 
   // Size validation
   if (file.size === 0) {
-    errors.push('File is empty');
+    errors.push("File is empty");
   }
   if (file.size > MAX_FILE_SIZE) {
     errors.push(`File must be smaller than 100MB`);
@@ -496,9 +491,7 @@ export function validateFileUpload(file: {
 
   // Type validation
   if (!ALLOWED_TYPES.includes(file.type)) {
-    errors.push(
-      `File type not allowed. Allowed: PNG, JPEG, WebP, ZIP`
-    );
+    errors.push(`File type not allowed. Allowed: PNG, JPEG, WebP, ZIP`);
   }
 
   return {
@@ -520,16 +513,16 @@ export function validateImageFile(file: {
 } {
   const errors: string[] = [];
   const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-  const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+  const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
   // Size
   if (file.size > MAX_SIZE) {
-    errors.push('Image must be smaller than 5MB');
+    errors.push("Image must be smaller than 5MB");
   }
 
   // Type
   if (!ALLOWED_TYPES.includes(file.type)) {
-    errors.push('Only PNG, JPEG, and WebP images are allowed');
+    errors.push("Only PNG, JPEG, and WebP images are allowed");
   }
 
   return {

@@ -1,12 +1,12 @@
 /**
  * Audit logging system
  * Logs all sensitive actions for compliance and security monitoring
- * 
+ *
  * Append-only collection: audit_logs
  * Accessible only to admins
  */
 
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 
 const db = admin.firestore();
 
@@ -17,7 +17,7 @@ export interface AuditLog {
   action: string; // What (e.g., ROLE_CHANGED, ASSET_PUBLISHED, USER_BANNED)
   targetId: string; // What entity (user ID, asset ID, etc.)
   details?: Record<string, any>; // Additional context
-  status: 'success' | 'failed';
+  status: "success" | "failed";
   ipAddress?: string;
   userAgent?: string;
 }
@@ -25,7 +25,7 @@ export interface AuditLog {
 /**
  * Log an audit action
  * Should be called for all sensitive operations
- * 
+ *
  * Usage:
  * await logAuditAction(userId, 'USER_BANNED', targetUserId, true, details);
  */
@@ -36,35 +36,35 @@ export async function logAuditAction(
   isSensitive: boolean = false,
   details?: Record<string, any>,
   ipAddress?: string,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<string> {
   try {
-    const auditLog: Omit<AuditLog, 'id'> = {
+    const auditLog: Omit<AuditLog, "id"> = {
       timestamp: new Date(),
       actorId,
       action,
       targetId,
       details: details || {},
-      status: 'success',
+      status: "success",
       ipAddress: isSensitive ? ipAddress : undefined,
       userAgent: isSensitive ? userAgent : undefined,
     };
 
-    const docRef = await db.collection('audit_logs').add(auditLog);
+    const docRef = await db.collection("audit_logs").add(auditLog);
 
     // Alert on critical actions
     const criticalActions = [
-      'USER_BANNED',
-      'USER_UNBANNED',
-      'ROLE_CHANGED',
-      'MASS_DELETE',
-      'UPLOAD_REJECTED_NSFW',
-      'WARNING_CREATED',
+      "USER_BANNED",
+      "USER_UNBANNED",
+      "ROLE_CHANGED",
+      "MASS_DELETE",
+      "UPLOAD_REJECTED_NSFW",
+      "WARNING_CREATED",
     ];
 
     if (criticalActions.includes(action)) {
       console.warn(
-        `🚨 CRITICAL AUDIT: ${action} - Actor: ${actorId}, Target: ${targetId}`
+        `🚨 CRITICAL AUDIT: ${action} - Actor: ${actorId}, Target: ${targetId}`,
       );
 
       // In production: send to monitoring service (Sentry, DataDog, etc.)
@@ -73,9 +73,9 @@ export async function logAuditAction(
 
     return docRef.id;
   } catch (error) {
-    console.error('Failed to log audit action:', error);
+    console.error("Failed to log audit action:", error);
     // Don't throw - failing to log shouldn't block the operation
-    return 'audit_failed';
+    return "audit_failed";
   }
 }
 
@@ -92,38 +92,38 @@ export async function getAuditLogs(
     startDate?: Date;
     endDate?: Date;
     limit?: number;
-  }
+  },
 ): Promise<AuditLog[]> {
   try {
     // Check if user is admin
-    const userDoc = await db.collection('users').doc(userId).get();
+    const userDoc = await db.collection("users").doc(userId).get();
     const userRole = userDoc.data()?.role;
 
-    if (!['admin', 'founder'].includes(userRole)) {
-      throw new Error('Unauthorized: Only admins can view audit logs');
+    if (!["admin", "founder"].includes(userRole)) {
+      throw new Error("Unauthorized: Only admins can view audit logs");
     }
 
-    let query: FirebaseFirestore.Query = db.collection('audit_logs');
+    let query: FirebaseFirestore.Query = db.collection("audit_logs");
 
     // Apply filters
     if (filters?.action) {
-      query = query.where('action', '==', filters.action);
+      query = query.where("action", "==", filters.action);
     }
     if (filters?.actorId) {
-      query = query.where('actorId', '==', filters.actorId);
+      query = query.where("actorId", "==", filters.actorId);
     }
     if (filters?.targetId) {
-      query = query.where('targetId', '==', filters.targetId);
+      query = query.where("targetId", "==", filters.targetId);
     }
     if (filters?.startDate) {
-      query = query.where('timestamp', '>=', filters.startDate);
+      query = query.where("timestamp", ">=", filters.startDate);
     }
     if (filters?.endDate) {
-      query = query.where('timestamp', '<=', filters.endDate);
+      query = query.where("timestamp", "<=", filters.endDate);
     }
 
     // Sort by timestamp descending
-    query = query.orderBy('timestamp', 'desc');
+    query = query.orderBy("timestamp", "desc");
 
     // Limit results
     const limit = filters?.limit || 100;
@@ -142,7 +142,7 @@ export async function getAuditLogs(
 
     return logs;
   } catch (error) {
-    console.error('Error fetching audit logs:', error);
+    console.error("Error fetching audit logs:", error);
     throw error;
   }
 }
@@ -162,24 +162,24 @@ export async function checkSuspiciousActivity(userId: string): Promise<{
   try {
     // Check for multiple failed write attempts
     const failedWrites = await db
-      .collection('audit_logs')
-      .where('actorId', '==', userId)
-      .where('status', '==', 'failed')
-      .where('timestamp', '>=', last24h)
+      .collection("audit_logs")
+      .where("actorId", "==", userId)
+      .where("status", "==", "failed")
+      .where("timestamp", ">=", last24h)
       .get();
 
     if (failedWrites.size > 20) {
       alerts.push(
-        `User had ${failedWrites.size} failed write attempts in 24 hours`
+        `User had ${failedWrites.size} failed write attempts in 24 hours`,
       );
     }
 
     // Check for rapid uploads
     const recentUploads = await db
-      .collection('audit_logs')
-      .where('actorId', '==', userId)
-      .where('action', '==', 'ASSET_CREATED')
-      .where('timestamp', '>=', new Date(now.getTime() - 60 * 60 * 1000)) // Last hour
+      .collection("audit_logs")
+      .where("actorId", "==", userId)
+      .where("action", "==", "ASSET_CREATED")
+      .where("timestamp", ">=", new Date(now.getTime() - 60 * 60 * 1000)) // Last hour
       .get();
 
     if (recentUploads.size > 20) {
@@ -188,14 +188,16 @@ export async function checkSuspiciousActivity(userId: string): Promise<{
 
     // Check for multiple NSFW rejections
     const nsfwRejections = await db
-      .collection('audit_logs')
-      .where('actorId', '==', userId)
-      .where('action', '==', 'UPLOAD_REJECTED_NSFW')
-      .where('timestamp', '>=', last24h)
+      .collection("audit_logs")
+      .where("actorId", "==", userId)
+      .where("action", "==", "UPLOAD_REJECTED_NSFW")
+      .where("timestamp", ">=", last24h)
       .get();
 
     if (nsfwRejections.size >= 3) {
-      alerts.push(`User had ${nsfwRejections.size} NSFW rejections in 24 hours`);
+      alerts.push(
+        `User had ${nsfwRejections.size} NSFW rejections in 24 hours`,
+      );
     }
 
     return {
@@ -203,7 +205,7 @@ export async function checkSuspiciousActivity(userId: string): Promise<{
       alerts,
     };
   } catch (error) {
-    console.error('Error checking suspicious activity:', error);
+    console.error("Error checking suspicious activity:", error);
     return { suspicious: false, alerts: [] };
   }
 }
@@ -215,20 +217,20 @@ export async function checkSuspiciousActivity(userId: string): Promise<{
 export async function exportAuditLogs(
   userId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<AuditLog[]> {
-  const userDoc = await db.collection('users').doc(userId).get();
+  const userDoc = await db.collection("users").doc(userId).get();
   const userRole = userDoc.data()?.role;
 
-  if (!['admin', 'founder'].includes(userRole)) {
-    throw new Error('Unauthorized');
+  if (!["admin", "founder"].includes(userRole)) {
+    throw new Error("Unauthorized");
   }
 
   const snapshot = await db
-    .collection('audit_logs')
-    .where('timestamp', '>=', startDate)
-    .where('timestamp', '<=', endDate)
-    .orderBy('timestamp', 'desc')
+    .collection("audit_logs")
+    .where("timestamp", ">=", startDate)
+    .where("timestamp", "<=", endDate)
+    .orderBy("timestamp", "desc")
     .get();
 
   const logs: AuditLog[] = [];

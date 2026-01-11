@@ -8,9 +8,9 @@
  * Deploy with: firebase deploy --only functions:onAssetCreated,functions:scanImageForNSFW
  */
 
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import { logAuditAction } from './audit';
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+import { logAuditAction } from "./audit";
 
 const db = admin.firestore();
 const storage = admin.storage();
@@ -22,14 +22,16 @@ const JIGSAWSTACK_API_KEY = process.env.JIGSAWSTACK_API_KEY;
  * Runs NSFW scan and updates asset status
  */
 export const onAssetUploaded = functions.firestore
-  .document('assets/{assetId}')
+  .document("assets/{assetId}")
   .onCreate(async (snap, context) => {
     const asset = snap.data() as any;
     const assetId = context.params.assetId;
 
     // Only process uploaded assets with status 'uploading'
-    if (asset.status !== 'uploading') {
-      console.log(`⏭️  Skipping asset ${assetId}: status is ${asset.status}, not 'uploading'`);
+    if (asset.status !== "uploading") {
+      console.log(
+        `⏭️  Skipping asset ${assetId}: status is ${asset.status}, not 'uploading'`,
+      );
       return;
     }
 
@@ -37,14 +39,16 @@ export const onAssetUploaded = functions.firestore
       console.log(`\n🔍 === NSFW SCAN STARTED for Asset: ${assetId} ===`);
       console.log(`   Author: ${asset.authorId}`);
       console.log(`   Name: ${asset.name}`);
-      console.log(`   Image URL: ${asset.imageUrl ? asset.imageUrl.substring(0, 50) + '...' : 'MISSING'}`);
+      console.log(
+        `   Image URL: ${asset.imageUrl ? asset.imageUrl.substring(0, 50) + "..." : "MISSING"}`,
+      );
 
       // Check if asset has an image URL
       if (!asset.imageUrl) {
         console.error(`❌ Asset ${assetId} has no imageUrl - rejecting`);
         await snap.ref.update({
-          status: 'rejected',
-          rejectionReason: 'No image provided for verification',
+          status: "rejected",
+          rejectionReason: "No image provided for verification",
           rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
         });
         return;
@@ -56,8 +60,8 @@ export const onAssetUploaded = functions.firestore
       } catch (e) {
         console.error(`❌ Invalid image URL: ${asset.imageUrl}`);
         await snap.ref.update({
-          status: 'rejected',
-          rejectionReason: 'Invalid image URL',
+          status: "rejected",
+          rejectionReason: "Invalid image URL",
           rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
         });
         return;
@@ -67,9 +71,9 @@ export const onAssetUploaded = functions.firestore
       console.log(`📝 Checking text content for NSFW...`);
 
       const textChecks = await Promise.all([
-        checkTextForNSFW(asset.name || '', 'Asset Name'),
-        checkTextForNSFW(asset.description || '', 'Description'),
-        checkTextForNSFW((asset.tags || []).join(' '), 'Tags'),
+        checkTextForNSFW(asset.name || "", "Asset Name"),
+        checkTextForNSFW(asset.description || "", "Description"),
+        checkTextForNSFW((asset.tags || []).join(" "), "Tags"),
       ]);
 
       const hasNSFWText = textChecks.some((check) => check.isNSFW);
@@ -80,8 +84,8 @@ export const onAssetUploaded = functions.firestore
       if (hasNSFWText) {
         console.warn(`⛔ NSFW TEXT DETECTED - Rejecting upload`);
         await snap.ref.update({
-          status: 'rejected',
-          rejectionReason: `Content violates community guidelines (${nsfwTextReasons.join('; ')})`,
+          status: "rejected",
+          rejectionReason: `Content violates community guidelines (${nsfwTextReasons.join("; ")})`,
           rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
         });
 
@@ -89,9 +93,9 @@ export const onAssetUploaded = functions.firestore
         try {
           await createWarning(
             asset.authorId,
-            'upload_abuse',
-            `Your upload "${asset.name}" was rejected for containing inappropriate text content. ${nsfwTextReasons.join('; ')}`,
-            asset.imageUrl
+            "upload_abuse",
+            `Your upload "${asset.name}" was rejected for containing inappropriate text content. ${nsfwTextReasons.join("; ")}`,
+            asset.imageUrl,
           );
         } catch (warningError) {
           console.error(`Failed to create warning:`, warningError);
@@ -101,10 +105,10 @@ export const onAssetUploaded = functions.firestore
         try {
           await logAuditAction(
             asset.authorId,
-            'UPLOAD_REJECTED_NSFW_TEXT',
+            "UPLOAD_REJECTED_NSFW_TEXT",
             assetId,
             true,
-            { reasons: nsfwTextReasons, assetName: asset.name }
+            { reasons: nsfwTextReasons, assetName: asset.name },
           );
         } catch (auditError) {
           console.error(`Failed to log audit:`, auditError);
@@ -119,17 +123,19 @@ export const onAssetUploaded = functions.firestore
 
       console.log(`📊 NSFW Detection Result:`);
       console.log(`   Is NSFW: ${nsfwResult.isNSFW}`);
-      console.log(`   Confidence: ${(nsfwResult.confidence * 100).toFixed(1)}%`);
+      console.log(
+        `   Confidence: ${(nsfwResult.confidence * 100).toFixed(1)}%`,
+      );
       console.log(`   Reason: ${nsfwResult.reason}`);
 
       if (nsfwResult.isNSFW) {
         // ⛔ REJECT - Inappropriate content detected
         console.warn(
-          `⛔⛔⛔ NSFW CONTENT DETECTED - Asset ${assetId} REJECTED ⛔⛔⛔`
+          `⛔⛔⛔ NSFW CONTENT DETECTED - Asset ${assetId} REJECTED ⛔⛔⛔`,
         );
 
         await snap.ref.update({
-          status: 'rejected',
+          status: "rejected",
           rejectionReason: `Content violates community guidelines (inappropriate content detected - ${nsfwResult.reason})`,
           rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
           nsfwConfidence: nsfwResult.confidence,
@@ -140,19 +146,22 @@ export const onAssetUploaded = functions.firestore
         try {
           await createWarning(
             asset.authorId,
-            'upload_abuse',
+            "upload_abuse",
             `Your upload "${asset.name}" was rejected for containing inappropriate content. Confidence: ${(nsfwResult.confidence * 100).toFixed(1)}%. Reason: ${nsfwResult.reason}`,
-            asset.imageUrl
+            asset.imageUrl,
           );
         } catch (warningError) {
-          console.error(`Failed to create warning for user ${asset.authorId}:`, warningError);
+          console.error(
+            `Failed to create warning for user ${asset.authorId}:`,
+            warningError,
+          );
         }
 
         // Log audit action
         try {
           await logAuditAction(
             asset.authorId,
-            'UPLOAD_REJECTED_NSFW',
+            "UPLOAD_REJECTED_NSFW",
             assetId,
             true,
             {
@@ -160,7 +169,7 @@ export const onAssetUploaded = functions.firestore
               confidence: nsfwResult.confidence,
               reason: nsfwResult.reason,
               detectionTime: new Date().toISOString(),
-            }
+            },
           );
         } catch (auditError) {
           console.error(`Failed to log audit action:`, auditError);
@@ -170,10 +179,12 @@ export const onAssetUploaded = functions.firestore
       }
 
       // ✅ SAFE - Publish the asset
-      console.log(`✅✅✅ ASSET PASSED NSFW CHECK - Asset ${assetId} PUBLISHED ✅✅✅\n`);
+      console.log(
+        `✅✅✅ ASSET PASSED NSFW CHECK - Asset ${assetId} PUBLISHED ✅✅✅\n`,
+      );
 
       await snap.ref.update({
-        status: 'published',
+        status: "published",
         publishedDate: admin.firestore.FieldValue.serverTimestamp(),
         nsfwChecked: true,
         nsfwConfidence: nsfwResult.confidence,
@@ -183,32 +194,37 @@ export const onAssetUploaded = functions.firestore
       try {
         await logAuditAction(
           asset.authorId,
-          'ASSET_PUBLISHED',
+          "ASSET_PUBLISHED",
           assetId,
           false,
           {
             assetName: asset.name,
             nsfwConfidence: nsfwResult.confidence,
-          }
+          },
         );
       } catch (auditError) {
         console.error(`Failed to log successful upload:`, auditError);
       }
-
     } catch (error) {
       console.error(`\n❌❌❌ ERROR processing asset ${assetId}:`, error);
-      console.error(`Error details: ${error instanceof Error ? error.message : String(error)}\n`);
+      console.error(
+        `Error details: ${error instanceof Error ? error.message : String(error)}\n`,
+      );
 
       // FAIL SAFE: Reject the upload if verification fails
       try {
         await snap.ref.update({
-          status: 'rejected',
-          rejectionReason: `Upload verification failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try uploading again.`,
+          status: "rejected",
+          rejectionReason: `Upload verification failed: ${error instanceof Error ? error.message : "Unknown error"}. Please try uploading again.`,
           rejectionDate: admin.firestore.FieldValue.serverTimestamp(),
-          verificationError: error instanceof Error ? error.message : String(error),
+          verificationError:
+            error instanceof Error ? error.message : String(error),
         });
       } catch (updateError) {
-        console.error(`Failed to update asset status after error:`, updateError);
+        console.error(
+          `Failed to update asset status after error:`,
+          updateError,
+        );
       }
     }
   });
@@ -216,7 +232,7 @@ export const onAssetUploaded = functions.firestore
 /**
  * Check image for NSFW content using OpenRouter API
  * Uses a free vision model that can analyze images
- * 
+ *
  * Response format:
  * {
  *   "is_nsfw": boolean,
@@ -224,9 +240,7 @@ export const onAssetUploaded = functions.firestore
  *   "reason": string
  * }
  */
-async function checkImageForNSFW(
-  imageUrl: string
-): Promise<{
+async function checkImageForNSFW(imageUrl: string): Promise<{
   isNSFW: boolean;
   confidence: number;
   reason: string;
@@ -235,36 +249,44 @@ async function checkImageForNSFW(
   const apiKey = OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    console.warn('⚠️ OPENROUTER_API_KEY not configured - FAILING SAFE (rejecting uploads)');
-    throw new Error('NSFW detection service unavailable - uploads temporarily disabled');
+    console.warn(
+      "⚠️ OPENROUTER_API_KEY not configured - FAILING SAFE (rejecting uploads)",
+    );
+    throw new Error(
+      "NSFW detection service unavailable - uploads temporarily disabled",
+    );
   }
 
   try {
-    console.log(`🔍 Scanning image for NSFW content: ${imageUrl.substring(0, 50)}...`);
+    console.log(
+      `🔍 Scanning image for NSFW content: ${imageUrl.substring(0, 50)}...`,
+    );
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://marketplace.example.com',
-        'X-Title': 'Marketplace NSFW Detection System',
-      },
-      body: JSON.stringify({
-        model: 'xiaomi/mimo-v2-flash:free', // Free vision model with fast inference
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl,
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://marketplace.example.com",
+          "X-Title": "Marketplace NSFW Detection System",
+        },
+        body: JSON.stringify({
+          model: "xiaomi/mimo-v2-flash:free", // Free vision model with fast inference
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: imageUrl,
+                  },
                 },
-              },
-              {
-                type: 'text',
-                text: `You are a strict content moderation AI for a digital asset marketplace.
+                {
+                  type: "text",
+                  text: `You are a strict content moderation AI for a digital asset marketplace.
 
 ANALYZE THIS IMAGE CAREFULLY and respond ONLY with valid JSON (no markdown, no code blocks, no explanations):
 
@@ -295,14 +317,15 @@ IMPORTANT: When in doubt, set is_nsfw=true and high confidence.
 This is for public marketplace - err on side of caution.
 Even if artistic, flag nudity as NSFW.
 Be STRICT. This is a marketplace for family-friendly content.`,
-              },
-            ],
-          },
-        ],
-        max_tokens: 150,
-        temperature: 0.1,
-      }),
-    });
+                },
+              ],
+            },
+          ],
+          max_tokens: 150,
+          temperature: 0.1,
+        }),
+      },
+    );
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -313,8 +336,8 @@ Be STRICT. This is a marketplace for family-friendly content.`,
     const data = (await response.json()) as any;
 
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Invalid OpenRouter response:', data);
-      throw new Error('Invalid response format from OpenRouter API');
+      console.error("Invalid OpenRouter response:", data);
+      throw new Error("Invalid response format from OpenRouter API");
     }
 
     const content = data.choices[0].message.content;
@@ -331,25 +354,29 @@ Be STRICT. This is a marketplace for family-friendly content.`,
     try {
       result = JSON.parse(jsonMatch[0]);
     } catch (parseError) {
-      console.error('JSON parse error:', parseError, 'Content:', jsonMatch[0]);
-      throw new Error('Invalid JSON in NSFW detection response');
+      console.error("JSON parse error:", parseError, "Content:", jsonMatch[0]);
+      throw new Error("Invalid JSON in NSFW detection response");
     }
 
     const isNSFW = result.is_nsfw === true || result.confidence > 0.65;
     const confidence = Number(result.confidence) || 0;
-    const reason = String(result.reason || 'No reason provided');
+    const reason = String(result.reason || "No reason provided");
 
-    console.log(`✅ NSFW Check result - Is NSFW: ${isNSFW}, Confidence: ${confidence}, Category: ${result.category}`);
+    console.log(
+      `✅ NSFW Check result - Is NSFW: ${isNSFW}, Confidence: ${confidence}, Category: ${result.category}`,
+    );
 
     return {
       isNSFW,
       confidence,
-      reason: `[${result.category || 'unknown'}] ${reason}`,
+      reason: `[${result.category || "unknown"}] ${reason}`,
     };
   } catch (error) {
-    console.error('❌ NSFW check error:', error);
+    console.error("❌ NSFW check error:", error);
     // FAIL SAFE: Reject the upload if we can't verify
-    throw new Error(`NSFW detection failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `NSFW detection failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -361,7 +388,7 @@ Be STRICT. This is a marketplace for family-friendly content.`,
  */
 async function checkTextForNSFW(
   text: string,
-  fieldName: string
+  fieldName: string,
 ): Promise<{
   isNSFW: boolean;
   reason: string;
@@ -369,68 +396,89 @@ async function checkTextForNSFW(
   sentiment: string;
 }> {
   if (!JIGSAWSTACK_API_KEY) {
-    console.warn('⚠️ JIGSAWSTACK_API_KEY not configured - skipping text NSFW check');
-    return { isNSFW: false, reason: 'Text check skipped', emotion: '', sentiment: '' };
+    console.warn(
+      "⚠️ JIGSAWSTACK_API_KEY not configured - skipping text NSFW check",
+    );
+    return {
+      isNSFW: false,
+      reason: "Text check skipped",
+      emotion: "",
+      sentiment: "",
+    };
   }
 
   if (!text || text.trim().length === 0) {
-    return { isNSFW: false, reason: 'Empty text', emotion: '', sentiment: '' };
+    return { isNSFW: false, reason: "Empty text", emotion: "", sentiment: "" };
   }
 
   try {
     console.log(`📝 Checking "${fieldName}": "${text.substring(0, 50)}..."`);
 
-    const response = await fetch('https://api.jigsawstack.com/v1/ai/sentiment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': JIGSAWSTACK_API_KEY,
+    const response = await fetch(
+      "https://api.jigsawstack.com/v1/ai/sentiment",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": JIGSAWSTACK_API_KEY,
+        },
+        body: JSON.stringify({ text }),
       },
-      body: JSON.stringify({ text }),
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.text();
       console.error(`JigsawStack API error (${response.status}):`, errorData);
       // Non-critical: continue with image check if text check fails
-      return { isNSFW: false, reason: 'Text check API error', emotion: '', sentiment: '' };
+      return {
+        isNSFW: false,
+        reason: "Text check API error",
+        emotion: "",
+        sentiment: "",
+      };
     }
 
     const data = (await response.json()) as any;
 
     if (!data.sentiment) {
-      console.warn('No sentiment data in JigsawStack response');
-      return { isNSFW: false, reason: 'No sentiment data', emotion: '', sentiment: '' };
+      console.warn("No sentiment data in JigsawStack response");
+      return {
+        isNSFW: false,
+        reason: "No sentiment data",
+        emotion: "",
+        sentiment: "",
+      };
     }
 
-    const emotion = data.sentiment.emotion || '';
-    const sentiment = data.sentiment.sentiment || '';
+    const emotion = data.sentiment.emotion || "";
+    const sentiment = data.sentiment.sentiment || "";
     const score = data.sentiment.score || 0;
 
-    console.log(`   Emotion: ${emotion}, Sentiment: ${sentiment}, Score: ${score}`);
+    console.log(
+      `   Emotion: ${emotion}, Sentiment: ${sentiment}, Score: ${score}`,
+    );
 
     // Detect inappropriate content based on emotion/sentiment
     const nsfwEmotions = [
-      'anger',
-      'hatred',
-      'disgust',
-      'obscenity',
-      'explicit',
-      'sexual',
-      'profanity',
-      'slur',
-      'abuse',
-      'harassment',
+      "anger",
+      "hatred",
+      "disgust",
+      "obscenity",
+      "explicit",
+      "sexual",
+      "profanity",
+      "slur",
+      "abuse",
+      "harassment",
     ];
 
     const isEmotionNSFW = nsfwEmotions.some(
-      (e) =>
-        emotion.toLowerCase().includes(e) ||
-        emotion.toLowerCase() === e
+      (e) => emotion.toLowerCase().includes(e) || emotion.toLowerCase() === e,
     );
 
     // Also check for text patterns that often indicate NSFW
-    const nsfwPatterns = /sex|porn|xxx|nude|dick|pussy|cock|ass|shit|fuck|damn|cunt|whore|slut|rape|incest/gi;
+    const nsfwPatterns =
+      /sex|porn|xxx|nude|dick|pussy|cock|ass|shit|fuck|damn|cunt|whore|slut|rape|incest/gi;
     const textHasNSFWPattern = nsfwPatterns.test(text);
 
     const finalIsNSFW = isEmotionNSFW || textHasNSFWPattern;
@@ -441,14 +489,21 @@ async function checkTextForNSFW(
 
     return {
       isNSFW: finalIsNSFW,
-      reason: finalIsNSFW ? `${fieldName}: Inappropriate content` : `${fieldName}: Safe`,
+      reason: finalIsNSFW
+        ? `${fieldName}: Inappropriate content`
+        : `${fieldName}: Safe`,
       emotion,
       sentiment,
     };
   } catch (error) {
     console.error(`Text NSFW check error for "${fieldName}":`, error);
     // Non-critical: continue if text check fails
-    return { isNSFW: false, reason: 'Text check failed', emotion: '', sentiment: '' };
+    return {
+      isNSFW: false,
+      reason: "Text check failed",
+      emotion: "",
+      sentiment: "",
+    };
   }
 }
 
@@ -458,23 +513,23 @@ async function checkTextForNSFW(
  */
 async function createWarning(
   userId: string,
-  reason: 'upload_abuse' | 'spam' | 'harassment' | 'rule_violation',
+  reason: "upload_abuse" | "spam" | "harassment" | "rule_violation",
   message: string,
-  evidence?: string
+  evidence?: string,
 ): Promise<void> {
   try {
     // Count active warnings for this reason
     const existingWarnings = await db
-      .collection('warnings')
-      .where('userId', '==', userId)
-      .where('reason', '==', reason)
-      .where('isActive', '==', true)
+      .collection("warnings")
+      .where("userId", "==", userId)
+      .where("reason", "==", reason)
+      .where("isActive", "==", true)
       .get();
 
     const warningCount = existingWarnings.size + 1;
 
     // Create new warning
-    await db.collection('warnings').add({
+    await db.collection("warnings").add({
       userId,
       reason,
       message,
@@ -484,60 +539,61 @@ async function createWarning(
       acknowledgedAt: null,
     });
 
-    console.log(`⚠️  Warning #${warningCount} created for user ${userId}: ${reason}`);
+    console.log(
+      `⚠️  Warning #${warningCount} created for user ${userId}: ${reason}`,
+    );
 
     // Auto-ban after 3 warnings
     if (warningCount >= 3) {
       const banUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-      console.warn(`🔒 Auto-banning user ${userId} after 3 warnings for ${reason}`);
+      console.warn(
+        `🔒 Auto-banning user ${userId} after 3 warnings for ${reason}`,
+      );
 
-      await db.collection('users').doc(userId).update({
-        isBanned: true,
-        banReason: `Automatic 7-day ban: 3 warnings for ${reason}`,
-        banDate: admin.firestore.FieldValue.serverTimestamp(),
-        banUntilDate: banUntil,
-      });
+      await db
+        .collection("users")
+        .doc(userId)
+        .update({
+          isBanned: true,
+          banReason: `Automatic 7-day ban: 3 warnings for ${reason}`,
+          banDate: admin.firestore.FieldValue.serverTimestamp(),
+          banUntilDate: banUntil,
+        });
 
       // Disable Firebase Auth user
       const auth = admin.auth();
       await auth.updateUser(userId, { disabled: true });
 
       // Notify user
-      await db.collection('notifications').add({
+      await db.collection("notifications").add({
         userId,
-        type: 'ban',
-        title: 'Account Temporarily Suspended',
+        type: "ban",
+        title: "Account Temporarily Suspended",
         message: `Your account has been suspended for 7 days due to repeated policy violations (${reason}). You can appeal at: support@marketplace.com`,
         read: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
       // Log ban
-      await logAuditAction(
-        'SYSTEM',
-        'AUTO_BAN_TRIGGERED',
-        userId,
-        true,
-        {
-          reason,
-          warningCount: 3,
-          banDays: 7,
-        }
-      );
+      await logAuditAction("SYSTEM", "AUTO_BAN_TRIGGERED", userId, true, {
+        reason,
+        warningCount: 3,
+        banDays: 7,
+      });
     } else {
       // Notify user of warning
-      await db.collection('notifications').add({
+      await db.collection("notifications").add({
         userId,
-        type: 'warning',
-        title: 'Account Warning',
+        type: "warning",
+        title: "Account Warning",
         message: `You have received a warning for ${reason}. (${warningCount}/3) Repeated violations will result in suspension.`,
         read: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }
   } catch (error) {
-    console.error('Error creating warning:', error);
+    console.error("Error creating warning:", error);
     throw error;
   }
 }
@@ -547,7 +603,7 @@ async function createWarning(
  * Run daily via Cloud Scheduler
  */
 export const checkExpiredBans = functions.pubsub
-  .schedule('every day 00:00')
+  .schedule("every day 00:00")
   .onRun(async () => {
     try {
       const now = new Date();
@@ -555,9 +611,9 @@ export const checkExpiredBans = functions.pubsub
 
       // Get all banned users with expiration date
       const bannedUsers = await db
-        .collection('users')
-        .where('isBanned', '==', true)
-        .where('banUntilDate', '<', now)
+        .collection("users")
+        .where("isBanned", "==", true)
+        .where("banUntilDate", "<", now)
         .get();
 
       let unbannedCount = 0;
@@ -577,17 +633,17 @@ export const checkExpiredBans = functions.pubsub
         await auth.updateUser(userId, { disabled: false });
 
         // Notify user
-        await db.collection('notifications').add({
+        await db.collection("notifications").add({
           userId,
-          type: 'unbanned',
-          title: 'Account Restored',
+          type: "unbanned",
+          title: "Account Restored",
           message: `Your account suspension has been lifted. Welcome back!`,
           read: false,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 
         // Log
-        await logAuditAction('SYSTEM', 'BAN_EXPIRED', userId, false, {
+        await logAuditAction("SYSTEM", "BAN_EXPIRED", userId, false, {
           autoRestored: true,
         });
 
@@ -596,7 +652,7 @@ export const checkExpiredBans = functions.pubsub
 
       console.log(`✅ Checked expired bans: ${unbannedCount} users restored`);
     } catch (error) {
-      console.error('Error checking expired bans:', error);
+      console.error("Error checking expired bans:", error);
     }
   });
 
@@ -605,21 +661,27 @@ export const checkExpiredBans = functions.pubsub
  * For admin use only - to re-scan assets
  */
 export const manualNSFWScan = functions.https.onCall(
-  async (data: { assetId: string }, context: functions.https.CallableContext) => {
+  async (
+    data: { assetId: string },
+    context: functions.https.CallableContext,
+  ) => {
     if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "Must be authenticated",
+      );
     }
 
     // Only admins
-    const userDoc = await db.collection('users').doc(context.auth.uid).get();
-    if (!['admin', 'founder'].includes(userDoc.data()?.role)) {
-      throw new functions.https.HttpsError('permission-denied', 'Admin only');
+    const userDoc = await db.collection("users").doc(context.auth.uid).get();
+    if (!["admin", "founder"].includes(userDoc.data()?.role)) {
+      throw new functions.https.HttpsError("permission-denied", "Admin only");
     }
 
     try {
-      const assetDoc = await db.collection('assets').doc(data.assetId).get();
+      const assetDoc = await db.collection("assets").doc(data.assetId).get();
       if (!assetDoc.exists) {
-        throw new functions.https.HttpsError('not-found', 'Asset not found');
+        throw new functions.https.HttpsError("not-found", "Asset not found");
       }
 
       const asset = assetDoc.data() as any;
@@ -628,10 +690,10 @@ export const manualNSFWScan = functions.https.onCall(
 
       await logAuditAction(
         context.auth.uid,
-        'MANUAL_NSFW_SCAN',
+        "MANUAL_NSFW_SCAN",
         data.assetId,
         false,
-        nsfwResult
+        nsfwResult,
       );
 
       return {
@@ -641,9 +703,9 @@ export const manualNSFWScan = functions.https.onCall(
         reason: nsfwResult.reason,
       };
     } catch (error: any) {
-      throw new functions.https.HttpsError('internal', error.message);
+      throw new functions.https.HttpsError("internal", error.message);
     }
-  }
+  },
 );
 
 /**
@@ -651,24 +713,30 @@ export const manualNSFWScan = functions.https.onCall(
  * Server-side to prevent tampering
  */
 export const recordAssetDownload = functions.https.onCall(
-  async (data: { assetId: string }, context: functions.https.CallableContext) => {
+  async (
+    data: { assetId: string },
+    context: functions.https.CallableContext,
+  ) => {
     if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "Must be authenticated",
+      );
     }
 
     try {
-      const assetDoc = await db.collection('assets').doc(data.assetId).get();
+      const assetDoc = await db.collection("assets").doc(data.assetId).get();
       if (!assetDoc.exists) {
-        throw new functions.https.HttpsError('not-found', 'Asset not found');
+        throw new functions.https.HttpsError("not-found", "Asset not found");
       }
 
       const asset = assetDoc.data() as any;
 
       // Check if published
-      if (asset.status !== 'published') {
+      if (asset.status !== "published") {
         throw new functions.https.HttpsError(
-          'failed-precondition',
-          'Asset is not available for download'
+          "failed-precondition",
+          "Asset is not available for download",
         );
       }
 
@@ -680,15 +748,15 @@ export const recordAssetDownload = functions.https.onCall(
       // Log
       await logAuditAction(
         context.auth.uid,
-        'ASSET_DOWNLOADED',
+        "ASSET_DOWNLOADED",
         data.assetId,
         false,
-        { assetAuthor: asset.authorId }
+        { assetAuthor: asset.authorId },
       );
 
       return { success: true };
     } catch (error: any) {
-      throw new functions.https.HttpsError('internal', error.message);
+      throw new functions.https.HttpsError("internal", error.message);
     }
-  }
+  },
 );

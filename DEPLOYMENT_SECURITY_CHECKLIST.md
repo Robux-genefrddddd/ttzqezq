@@ -58,10 +58,11 @@ const firebaseConfig = {
 ### Cloud Functions
 
 - [ ] **Deploy All Cloud Functions**
+
   ```bash
   firebase deploy --only functions
   ```
-  
+
   Functions required:
   - [ ] `registerUser` - User registration with validation
   - [ ] `updateUserRole` - Role changes (admin only)
@@ -74,6 +75,7 @@ const firebaseConfig = {
   - [ ] `checkExpiredBans` - Scheduled job for lifting expired bans
 
 - [ ] **Environment Variables Set**
+
   ```bash
   firebase functions:config:set \
     openrouter.api_key="sk-..." \
@@ -107,6 +109,7 @@ const firebaseConfig = {
   npm audit
   npm audit fix
   ```
+
   - [ ] Zero critical vulnerabilities
   - [ ] All dev dependencies up to date
 

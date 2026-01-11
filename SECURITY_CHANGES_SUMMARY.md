@@ -11,6 +11,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 ## 📁 New Files Created
 
 ### Documentation (4 files)
+
 1. **`SECURITY_HARDENING_GUIDE.md`** (1042 lines)
    - Comprehensive threat model analysis
    - Attack paths and severity ratings
@@ -40,6 +41,7 @@ Your marketplace application has undergone comprehensive security hardening agai
    - Monitoring and maintenance
 
 ### Firebase Rules (2 files - Modified)
+
 1. **`firestore.rules`** (281 lines) - NEW
    - User document protection (read-only fields)
    - Asset document protection (author-only edits)
@@ -54,6 +56,7 @@ Your marketplace application has undergone comprehensive security hardening agai
    - Profile image restrictions
 
 ### Server-Side Validation (1 file)
+
 1. **`server/validation/inputValidation.ts`** (540 lines)
    - Username validation (3-20 chars, allowed chars, reserved words)
    - Email validation (RFC 5322, case-insensitive)
@@ -64,6 +67,7 @@ Your marketplace application has undergone comprehensive security hardening agai
    - File upload validation (size, type)
 
 ### Cloud Functions (3 files)
+
 1. **`server/functions/auth.ts`** (422 lines)
    - `registerUser()` - Registration with server-side validation
    - `updateUserRole()` - Admin-only role changes with audit logging
@@ -86,6 +90,7 @@ Your marketplace application has undergone comprehensive security hardening agai
    - `exportAuditLogs()` - Compliance reporting
 
 ### Middleware & Security (2 files)
+
 1. **`server/middleware/rateLimit.ts`** (200 lines)
    - `loginLimiter` - 5 attempts per 15 minutes
    - `signupLimiter` - 10 accounts per hour
@@ -96,6 +101,7 @@ Your marketplace application has undergone comprehensive security hardening agai
    - Automatic cleanup of expired entries
 
 ### Server Updates (1 file - Modified)
+
 1. **`server/index.ts`** - UPDATED
    - Added security headers (XSS, MIME, CSP, X-Frame-Options)
    - Configured CORS properly
@@ -104,6 +110,7 @@ Your marketplace application has undergone comprehensive security hardening agai
    - Error handling middleware
 
 ### Download Endpoint (1 file - Modified)
+
 1. **`server/routes/download.ts`** - UPDATED
    - Directory traversal prevention
    - Asset verification (must be published)
@@ -117,6 +124,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 ## 🔐 Security Features Implemented
 
 ### 1. Authentication & Authorization
+
 - ✅ Email verification workflow
 - ✅ Strong password requirements
 - ✅ Rate-limited login attempts
@@ -124,6 +132,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ Custom claims in Firebase Auth
 
 ### 2. Input Validation
+
 - ✅ Username: 3-20 chars, allowed chars, uniqueness, reserved words
 - ✅ Email: RFC 5322 format, case-insensitive, uniqueness
 - ✅ Password: 8+ chars, uppercase, lowercase, number, special char
@@ -132,6 +141,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ All validation server-side (not just client)
 
 ### 3. Access Control
+
 - ✅ Firestore field-level protection (users can't modify role, earnings, etc.)
 - ✅ Firestore document-level protection (users read/write only own docs)
 - ✅ Admin-only operations via Cloud Functions
@@ -139,6 +149,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ Asset author verification
 
 ### 4. NSFW Detection
+
 - ✅ OpenRouter API integration
 - ✅ Free vision model used
 - ✅ Strict detection (>70% confidence threshold)
@@ -146,6 +157,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ Warning system with auto-ban (3 strikes)
 
 ### 5. Rate Limiting
+
 - ✅ Login: 5 attempts per 15 minutes
 - ✅ Signup: 10 accounts per hour
 - ✅ API: 100 requests per minute
@@ -153,6 +165,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ Messages: 10 per minute per group
 
 ### 6. Audit Logging
+
 - ✅ All admin actions logged
 - ✅ User registration logged
 - ✅ Role changes logged
@@ -161,6 +174,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ Download tracking
 
 ### 7. Download Security
+
 - ✅ Path traversal prevention
 - ✅ Asset publication verification
 - ✅ Content type validation
@@ -168,6 +182,7 @@ Your marketplace application has undergone comprehensive security hardening agai
 - ✅ Security headers
 
 ### 8. Server Hardening
+
 - ✅ CORS configured
 - ✅ Security headers (CSP, X-Frame-Options, XSS)
 - ✅ Body size limits
@@ -178,27 +193,29 @@ Your marketplace application has undergone comprehensive security hardening agai
 
 ## 📊 Code Statistics
 
-| Category | Files | Lines | Purpose |
-|----------|-------|-------|---------|
-| Documentation | 4 | 1,821 | Guides, checklists, integration |
-| Firebase Rules | 2 | 337 | Access control |
-| Validation | 1 | 540 | Input validation |
-| Cloud Functions | 3 | 1,112 | Privileged operations |
-| Middleware | 1 | 200 | Rate limiting |
-| Server Updates | 2 | ~150 | Security headers, error handling |
-| **TOTAL** | **13** | **4,160+** | **Security hardening** |
+| Category        | Files  | Lines      | Purpose                          |
+| --------------- | ------ | ---------- | -------------------------------- |
+| Documentation   | 4      | 1,821      | Guides, checklists, integration  |
+| Firebase Rules  | 2      | 337        | Access control                   |
+| Validation      | 1      | 540        | Input validation                 |
+| Cloud Functions | 3      | 1,112      | Privileged operations            |
+| Middleware      | 1      | 200        | Rate limiting                    |
+| Server Updates  | 2      | ~150       | Security headers, error handling |
+| **TOTAL**       | **13** | **4,160+** | **Security hardening**           |
 
 ---
 
 ## 🚀 Deployment Steps
 
 ### Step 1: Set Environment Variables
+
 ```bash
 # Set OpenRouter API key for Cloud Functions
 firebase functions:config:set openrouter.api_key="sk-or-v1-..."
 ```
 
 ### Step 2: Deploy Firebase Rules
+
 ```bash
 # Deploy Firestore security rules
 firebase deploy --only firestore:rules
@@ -208,6 +225,7 @@ firebase deploy --only storage
 ```
 
 ### Step 3: Deploy Cloud Functions
+
 ```bash
 # Deploy all Cloud Functions
 firebase deploy --only functions
@@ -217,6 +235,7 @@ firebase deploy --only functions:registerUser
 ```
 
 ### Step 4: Verify Deployment
+
 ```bash
 # Check function logs
 firebase functions:log
@@ -238,6 +257,7 @@ curl -X POST \
 ## 🔍 Key Security Improvements
 
 ### Before Implementation
+
 ❌ Users could set their own `role` to "admin"
 ❌ No input validation on username (duplicates possible)
 ❌ No NSFW detection (inappropriate content allowed)
@@ -248,6 +268,7 @@ curl -X POST \
 ❌ Direct client-side Firestore writes
 
 ### After Implementation
+
 ✅ Roles set server-only via Cloud Functions
 ✅ Username validated (unique, allowed chars, reserved words)
 ✅ NSFW detection with OpenRouter API + auto-rejection
@@ -262,14 +283,18 @@ curl -X POST \
 ## 🛠️ Implementation Highlights
 
 ### Threat: Auth Bypass (Users become admins)
+
 **Solution:**
+
 - Removed `role` parameter from client-side registration
 - Created `updateUserRole` Cloud Function (admin-only)
 - Firestore Rules prevent users from modifying `role` field
 - Custom claims set server-side only
 
 ### Threat: NSFW Content
+
 **Solution:**
+
 - Created `onAssetUploaded` Cloud Function
 - Integrates OpenRouter API for vision-based detection
 - Automatic rejection if inappropriate
@@ -277,21 +302,27 @@ curl -X POST \
 - Manual re-scan available for admins
 
 ### Threat: Rate Abuse / Spam
+
 **Solution:**
+
 - Implemented rate limiters in `server/middleware/rateLimit.ts`
 - Separate limits for login (5/15min), signup (10/hour), API (100/min)
 - Returns 429 status when limit exceeded
 - Ready to scale with Redis for distributed systems
 
 ### Threat: Unauthorized Data Access (IDOR)
+
 **Solution:**
+
 - Firestore Rules ensure users read/write only own documents
 - All queries filtered by `request.auth.uid`
 - Admin operations require role verification in Cloud Functions
 - Download endpoint verifies asset ownership
 
 ### Threat: Input Tampering
+
 **Solution:**
+
 - Server-side validation for all inputs
 - Username: reserved words list, allowed characters, length
 - Email: RFC 5322 format, uniqueness check
@@ -303,24 +334,28 @@ curl -X POST \
 ## 📋 Compliance Features
 
 ### Audit & Logging
+
 - Append-only audit log in Firestore
 - Admin-only access to logs
 - Timestamps and actor tracking
 - Detailed change records for sensitive operations
 
 ### User Data Protection
+
 - Email verification before account use
 - Password reset via email (not SMS)
 - Users can read/delete their own data
 - GDPR-friendly structure
 
 ### Content Moderation
+
 - Automatic NSFW detection
 - Warning system (transparent to users)
 - Account suspension options
 - Appeal mechanism (via support email)
 
 ### Administrative Control
+
 - Role-based access control
 - Audit trail of all admin actions
 - Ban management with duration
@@ -331,6 +366,7 @@ curl -X POST \
 ## 🧪 Testing Recommendations
 
 ### Unit Tests
+
 ```bash
 # Test input validation
 npm test -- server/validation/inputValidation.ts
@@ -340,6 +376,7 @@ npm test -- server/middleware/rateLimit.ts
 ```
 
 ### Integration Tests
+
 ```bash
 # Test Cloud Functions locally
 firebase emulators:start
@@ -349,6 +386,7 @@ npm test -- --emulator
 ```
 
 ### Manual Testing
+
 1. **Signup:** Create account with invalid username (should fail server-side)
 2. **Upload:** Try uploading NSFW image (should be rejected)
 3. **Admin:** Try changing own role to admin (should fail with permission error)
@@ -370,13 +408,17 @@ npm test -- --emulator
 ## ⚙️ Configuration & Customization
 
 ### Adjust NSFW Detection Threshold
+
 In `server/functions/uploadHandling.ts`, line ~70:
+
 ```typescript
 isNSFW: result.is_nsfw === true && result.confidence > 0.7, // Change 0.7 to adjust
 ```
 
 ### Adjust Rate Limits
+
 In `server/middleware/rateLimit.ts`:
+
 ```typescript
 export const loginLimiter = createLimiter(15 * 60 * 1000, 5); // 5 attempts per 15 min
 // Change to:
@@ -384,7 +426,9 @@ export const loginLimiter = createLimiter(15 * 60 * 1000, 10); // 10 attempts pe
 ```
 
 ### Adjust Ban Duration
+
 In `server/functions/uploadHandling.ts`, line ~130:
+
 ```typescript
 const banUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 // Change to:
@@ -411,29 +455,36 @@ const banUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days
 ## 📞 Support & Troubleshooting
 
 ### Issue: "Permission denied" when user tries to update profile
+
 **Cause:** Firestore Rules preventing modification of protected fields
 **Solution:** Only update safe fields (displayName, profileImage, etc.)
 Use Cloud Functions for privileged changes (role, rank, ban status)
 
 ### Issue: NSFW detection not working
+
 **Cause:** OpenRouter API key not configured
-**Solution:** 
+**Solution:**
+
 ```bash
 firebase functions:config:set openrouter.api_key="sk-..."
 firebase deploy --only functions
 ```
 
 ### Issue: Rate limiting not blocking requests
+
 **Cause:** In-memory store (doesn't work with multiple servers)
 **Solution:** Use Redis for production:
+
 ```bash
 npm install redis
 # Update rateLimit.ts to use Redis
 ```
 
 ### Issue: Cloud Functions timeout
+
 **Cause:** Slow OpenRouter API response or large file
 **Solution:**
+
 1. Increase function timeout in `firebase.json`
 2. Monitor OpenRouter API rate limits
 3. Test with smaller files first
@@ -443,25 +494,30 @@ npm install redis
 ## 🔄 Maintenance Schedule
 
 ### Daily
+
 - Monitor error logs
 - Check for suspicious activity in audit logs
 
 ### Weekly
+
 - Review upload rejections
 - Check rate limit metrics
 - Verify NSFW detection accuracy
 
 ### Monthly
+
 - Audit admin operations
 - Review user warnings and bans
 - Backup verification
 
 ### Quarterly
+
 - Penetration testing
 - Security dependency updates
 - API key rotation
 
 ### Annually
+
 - Full security audit
 - Compliance review
 - Disaster recovery test
@@ -482,8 +538,9 @@ npm install redis
 ✅ Clear incident response procedures
 
 **Your application is now secured against:**
+
 - SQL Injection
-- Authentication Bypass  
+- Authentication Bypass
 - Privilege Escalation
 - Broken Access Control (IDOR)
 - Input Injection Attacks

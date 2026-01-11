@@ -17,11 +17,13 @@ firebase functions:config:set openrouter.api_key="sk-or-v1-fd242297ae53773aabe09
 ```
 
 **Verify it's set:**
+
 ```bash
 firebase functions:config:get openrouter
 ```
 
 Should output:
+
 ```
 openrouter:
   api_key: sk-or-v1-...
@@ -36,6 +38,7 @@ firebase deploy --only functions
 ```
 
 **Monitor deployment:**
+
 ```bash
 firebase functions:log --follow
 ```
@@ -125,6 +128,7 @@ Log to Audit
 The system detects and rejects:
 
 ✅ **Strict NSFW Flags:**
+
 - Nudity (full or partial: breasts, genitals, buttocks, nipples)
 - Explicit sexual content
 - Extreme violence, gore, graphic injuries
@@ -133,6 +137,7 @@ The system detects and rejects:
 - Sexually suggestive positioning
 
 ❌ **Does NOT flag (allowed):**
+
 - Clothed people
 - Educational anatomical diagrams
 - Non-sexual art
@@ -155,7 +160,7 @@ return {
   // 0.65 = Medium (recommended)
   // 0.8  = More lenient (misses some NSFW)
   confidence,
-  reason: `[${result.category || 'unknown'}] ${reason}`,
+  reason: `[${result.category || "unknown"}] ${reason}`,
 };
 ```
 
@@ -182,6 +187,7 @@ firebase functions:log --follow
 ```
 
 **Look for:**
+
 ```
 🔍 === NSFW SCAN STARTED for Asset: [assetId] ===
    Author: [userId]
@@ -221,11 +227,13 @@ Shows: Warning count per user
 **Symptoms:** Assets publish immediately without checking, including explicit content
 
 **Causes:**
+
 1. Cloud Function not deployed
 2. API key not set
 3. Function has error (check logs)
 
 **Fix:**
+
 ```bash
 # Re-deploy
 firebase deploy --only functions:onAssetUploaded
@@ -244,12 +252,14 @@ firebase functions:log
 **Cause:** Confidence threshold too low
 
 **Fix:**
+
 ```typescript
 // In uploadHandling.ts, increase threshold:
 isNSFW: result.is_nsfw === true || result.confidence > 0.75, // was 0.65
 ```
 
 Then redeploy:
+
 ```bash
 firebase deploy --only functions
 ```
@@ -261,7 +271,9 @@ firebase deploy --only functions
 **Cause:** Confidence threshold too high OR OpenRouter model having issues
 
 **Fix:**
+
 1. Lower threshold:
+
 ```typescript
 isNSFW: result.is_nsfw === true || result.confidence > 0.55, // was 0.65
 ```
@@ -274,11 +286,13 @@ isNSFW: result.is_nsfw === true || result.confidence > 0.55, // was 0.65
 **Symptoms:** Assets rejected with generic error message
 
 **Causes:**
+
 1. OpenRouter API key invalid
 2. Rate limit exceeded
 3. API authentication failure
 
 **Fix:**
+
 ```bash
 # Verify API key
 firebase functions:config:get
@@ -304,6 +318,7 @@ Create a Firestore query to monitor NSFW rejections:
 **Order by:** `timestamp` (descending)
 
 This shows:
+
 - How many images were rejected (per user, per day)
 - Confidence scores
 - Detection categories
@@ -316,11 +331,13 @@ This shows:
 ### 1. API Key Security
 
 ✅ **DO:**
+
 - Store API key in Firebase environment variables only
 - Use `firebase functions:config:set` to set it
 - Rotate key every 3 months
 
 ❌ **DON'T:**
+
 - Commit API key to git
 - Use API key in frontend code
 - Share API key in slack/email
@@ -328,11 +345,13 @@ This shows:
 ### 2. NSFW Detection in Pipeline
 
 ✅ **DO:**
+
 - Run detection synchronously (block upload until verified)
 - Log all detections for compliance
 - Auto-reject with clear reason
 
 ❌ **DON'T:**
+
 - Run detection asynchronously (user gets access before check)
 - Delete NSFW images without logging
 - Tell users which model detected it
@@ -340,11 +359,13 @@ This shows:
 ### 3. User Communication
 
 ✅ **DO:**
+
 - Notify user when image is rejected
 - Provide appeal mechanism (support email)
 - Clear community guidelines
 
 ❌ **DON'T:**
+
 - Reject without explanation
 - Permanently ban without warnings
 - False positives (test before deploying)
@@ -354,12 +375,14 @@ This shows:
 ## 📊 Performance Metrics
 
 **OpenRouter xiaomi/mimo-v2-flash metrics:**
+
 - **Response Time:** ~2-5 seconds per image
 - **Cost:** FREE tier
 - **Accuracy:** ~85-90% for obvious content
 - **False Positives:** ~5-10% (e.g., artistic nudity flagged)
 
 **Recommendations:**
+
 - Don't use for medical/educational images (may be flagged)
 - Consider training custom model for specific use case
 - Review false positives monthly
@@ -380,14 +403,17 @@ This shows:
 ## 📞 Support
 
 **OpenRouter API Issues:**
+
 - https://openrouter.ai/docs
 - Check API status: https://status.openrouter.io/
 
 **Firebase Cloud Functions Issues:**
+
 - Firebase Console → Functions → Logs
 - Check quota: Firebase Console → Usage
 
 **Need to adjust:**
+
 - Confidence threshold? Edit `uploadHandling.ts`
 - Ban duration? Edit `createWarning()` function
 - Detection model? Change `model:` in API call
@@ -397,6 +423,7 @@ This shows:
 ## Summary
 
 ✅ **NSFW Detection System is:**
+
 - Automatically checking every upload
 - Rejecting explicit content with confidence scoring
 - Creating warnings for user tracking

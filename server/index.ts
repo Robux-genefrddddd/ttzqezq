@@ -27,7 +27,7 @@ export function createServer() {
     // Content Security Policy
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://firebasestorage.googleapis.com https://openrouter.ai; frame-ancestors 'none';"
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://firebasestorage.googleapis.com https://openrouter.ai; frame-ancestors 'none';",
     );
 
     // Remove powered by header
@@ -39,10 +39,12 @@ export function createServer() {
   // ========== CORS CONFIGURATION ==========
   app.use(
     cors({
-      origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:5173"],
+      origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+        "http://localhost:5173",
+      ],
       credentials: true,
       optionsSuccessStatus: 200,
-    })
+    }),
   );
 
   // ========== BODY PARSING ==========
@@ -82,23 +84,21 @@ export function createServer() {
   });
 
   // ========== ERROR HANDLER ==========
-  app.use(
-    (err: any, _req: Request, res: Response, _next: NextFunction) => {
-      console.error("Unhandled error:", err);
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error("Unhandled error:", err);
 
-      // Don't expose internal errors to client
-      const statusCode = err.statusCode || 500;
-      const message =
-        statusCode === 500
-          ? "Internal server error"
-          : err.message || "An error occurred";
+    // Don't expose internal errors to client
+    const statusCode = err.statusCode || 500;
+    const message =
+      statusCode === 500
+        ? "Internal server error"
+        : err.message || "An error occurred";
 
-      res.status(statusCode).json({
-        error: message,
-        ...(process.env.NODE_ENV === "development" && { details: err.message }),
-      });
-    }
-  );
+    res.status(statusCode).json({
+      error: message,
+      ...(process.env.NODE_ENV === "development" && { details: err.message }),
+    });
+  });
 
   return app;
 }
